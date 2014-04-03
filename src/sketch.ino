@@ -81,8 +81,12 @@ void loop () {
 
     uint8_t value = now.minute();
     long minutes = mapRange(value, 0, 60, 0, PIXELS);
-    strip.setPixelColor(minutes, 0, 80, 0);
-    
+
+    for(int i = 0; i < 2; i++) {
+        strip.setPixelColor(minutes, 0, 80, 0);
+        minutes = list->back(minutes, i);
+    }
+
     value = now.hour() % 12;
     uint8_t hours = value * 2;
     strip.setPixelColor(hours, 80, 0, 0);
@@ -92,7 +96,12 @@ void loop () {
     
     value = now.second();
     long seconds = mapRange(value, 0, 60, 0, PIXELS);
-    strip.setPixelColor(seconds, 50, 0, 80);
+
+    for(int i = 0; i < 3; i++) {
+        strip.setPixelColor(seconds, 50, 0, 80);
+        seconds = list->back(seconds, i);
+    }
+
     strip.show();
 
     delay(800);
