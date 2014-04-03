@@ -1,5 +1,7 @@
 #include <Adafruit_NeoPixel.h> 
 #include <Wire.h>
+#include <math.h>
+
 #include "RTClib.h"
 #include "LinkedList.h"
 
@@ -42,6 +44,12 @@ void clearStrip() {
         strip.setPixelColor(i, 1, 0, 1);
     }
 }
+
+long mapRange(double x, double in_min, double in_max, double out_min,
+    double out_max) {
+    return round((x - in_min) * (out_max - out_min) / (in_max - in_min) +
+        out_min);
+}
  
 void loop () {
     DateTime now = RTC.now();  
@@ -72,19 +80,19 @@ void loop () {
     clearStrip();
 
     uint8_t value = now.minute();
-    uint8_t minutes = map(value, 0, 60, 0, PIXELS);
-    strip.setPixelColor((int)minutes, 0, 80, 0);
+    long minutes = mapRange(value, 0, 60, 0, PIXELS);
+    strip.setPixelColor(minutes, 0, 80, 0);
     
     value = now.hour() % 12;
     uint8_t hours = value * 2;
-    strip.setPixelColor((int)hours, 80, 0, 0);
+    strip.setPixelColor(hours, 80, 0, 0);
     
     strip.show();
     delay(200);
     
     value = now.second();
-    uint8_t seconds = map(value, 0, 60, 0, PIXELS);
-    strip.setPixelColor((int)seconds, 50, 0, 80);
+    long seconds = mapRange(value, 0, 60, 0, PIXELS);
+    strip.setPixelColor(seconds, 50, 0, 80);
     strip.show();
 
     delay(800);
