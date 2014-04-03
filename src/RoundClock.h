@@ -1,5 +1,5 @@
-#ifndef __AOLIB_LINKEDLIST_H
-#define __AOLIB_LINKEDLIST_H
+#ifndef __AOLIB_ROUNDCLOCK_H
+#define __AOLIB_ROUNDCLOCK_H
 
 /**
  * A simple double linked list to represent a round clock.
