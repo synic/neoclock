@@ -1,6 +1,14 @@
 #ifndef __AOLIB_LINKEDLIST_H
 #define __AOLIB_LINKEDLIST_H
 
+/**
+ * A simple double linked list to represent a round clock.
+ *
+ * It allows you to take any point on the clock, and tell it you want
+ * <i>n</i> number of elements backward (or forward), and it will loop around
+ * the end to get you the values you need.
+ */
+
 class Node {
     public:
         int mLed;
@@ -8,7 +16,7 @@ class Node {
         Node *mPrev;
 };
 
-class LinkedList {
+class RoundClock {
     protected:
         int mSize;
         Node *mFirst;
@@ -17,8 +25,8 @@ class LinkedList {
         virtual Node* getNode(int index);
 
     public:
-        LinkedList();
-        ~LinkedList();
+        RoundClock();
+        ~RoundClock();
         virtual int size();
         virtual bool add(int led);
         virtual bool done();

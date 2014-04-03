@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "RTClib.h"
-#include "LinkedList.h"
+#include "RoundClock.h"
 
 // constants
 const uint8_t PIXELS = 24;
@@ -16,7 +16,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS,
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 boolean syncLoop = true;
 unsigned int loopCount = 0;
-LinkedList *list = new LinkedList();
+RoundClock *clock = new RoundClock();
  
 void setup () {
     Serial.begin(9600);
@@ -33,10 +33,10 @@ void setup () {
     }
 
     for(int i = 0; i < PIXELS; i++) {
-        list->add(i);
+        clock->add(i);
     }
     
-    list->done();
+    clock->done();
 }
 
 void clearStrip() {
@@ -84,7 +84,7 @@ void loop () {
 
     for(int i = 0; i < 2; i++) {
         strip.setPixelColor(minutes, 0, 80, 0);
-        minutes = list->back(minutes, i);
+        minutes = clock->back(minutes, i);
     }
 
     value = now.hour() % 12;
@@ -99,7 +99,7 @@ void loop () {
 
     for(int i = 0; i < 3; i++) {
         strip.setPixelColor(seconds, 50, 0, 80);
-        seconds = list->back(seconds, i);
+        seconds = clock->back(seconds, i);
     }
 
     strip.show();

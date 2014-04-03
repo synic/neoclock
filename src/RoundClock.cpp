@@ -1,13 +1,19 @@
-#include "LinkedList.h"
+#include "RoundClock.h"
 
-LinkedList::LinkedList() {
+/**
+ * Constructor
+ */
+RoundClock::RoundClock() {
     mSize = 0;
     mLast = 0;
     mFirst = 0;
     mDone = false;
 }
 
-LinkedList::~LinkedList() {
+/**
+ * Destructor
+ */
+RoundClock::~RoundClock() {
     for(int i = 0; i < mSize; i++) {
         Node *item = getNode(i);
         delete item;
@@ -19,11 +25,19 @@ LinkedList::~LinkedList() {
     mDone = false;
 }
 
-int LinkedList::size() {
+/**
+ * Returns the current size of the linked list contained here
+ */
+int RoundClock::size() {
     return mSize;
 }
 
-bool LinkedList::add(int led) {
+/**
+ * Adds an item to the list
+ */
+bool RoundClock::add(int led) {
+    if(mDone) return false;
+
     Node *item = new Node();
     item->mLed = led;
     if(mFirst == 0) {
@@ -38,22 +52,33 @@ bool LinkedList::add(int led) {
     return true;
 }
 
-bool LinkedList::done() {
+/**
+ * Tells the class that you're done adding items, and to link the first and
+ * the last elements.
+ */
+bool RoundClock::done() {
     if(mLast == 0 || mFirst == 0) {
         return false;
     }
 
     mLast->mNext = mFirst;
     mFirst->mPrev = mLast;
+    mDone = true;
     return true;
 }
 
-int LinkedList::get(int index) {
+/**
+ * Gets the LED number at the specified index
+ */
+int RoundClock::get(int index) {
     Node *tmp = getNode(index);
     return tmp->mLed;
 }
 
-Node *LinkedList::getNode(int index) {
+/**
+ * Gets the Node at the specified index
+ */
+Node *RoundClock::getNode(int index) {
     Node *tmp = mFirst;
 
     for(int i = 0; i <= index; i++) {
@@ -63,7 +88,10 @@ Node *LinkedList::getNode(int index) {
     return tmp;
 }
 
-int LinkedList::back(int index, int number) {
+/**
+ * Returns the LED marked that is `number` items backward from index
+ */
+int RoundClock::back(int index, int number) {
     Node *tmp = getNode(index);
     for(int i = 0; i < number; i++) {
         tmp = tmp->mPrev;
@@ -72,7 +100,11 @@ int LinkedList::back(int index, int number) {
     return tmp->mLed;
 }
 
-int LinkedList::forward(int index, int number) {
+/**
+ * Returns the LED marked that is `number` items forward from index.  Performs
+ * looping if necessary.
+ */
+int RoundClock::forward(int index, int number) {
     Node *tmp = getNode(index);
     for(int i = 0; i < number; i++) {
         tmp = tmp->mNext;
