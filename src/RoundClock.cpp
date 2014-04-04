@@ -49,6 +49,8 @@ bool RoundClock::add(int led) {
         mLast->mNext = item;
     }
 
+    mLast = item;
+
     return true;
 }
 
@@ -93,7 +95,7 @@ Node *RoundClock::getNode(int index) {
  */
 int RoundClock::back(int index, int number) {
     Node *tmp = getNode(index);
-    for(int i = 0; i < number; i++) {
+    for(int i = 0; i <= number; i++) {
         tmp = tmp->mPrev;
     }
 
@@ -106,7 +108,7 @@ int RoundClock::back(int index, int number) {
  */
 int RoundClock::forward(int index, int number) {
     Node *tmp = getNode(index);
-    for(int i = 0; i < number; i++) {
+    for(int i = 0; i <= number; i++) {
         tmp = tmp->mNext;
     }
 

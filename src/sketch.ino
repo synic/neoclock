@@ -29,7 +29,7 @@ void setup () {
         Serial.println("RTC is NOT running!");
         // following line sets the RTC to the date & time this 
         // sketch was compiled
-        //RTC.adjust(DateTime(__DATE__, __TIME__));
+        RTC.adjust(DateTime(__DATE__, __TIME__));
     }
 
     for(int i = 0; i < PIXELS; i++) {
@@ -50,6 +50,23 @@ long mapRange(double x, double in_min, double in_max, double out_min,
     return round((x - in_min) * (out_max - out_min) / (in_max - in_min) +
         out_min);
 }
+
+void fadeIn(int start, int count, int endPercent) {
+    int add = (count / (float)endPercent) * (float)endPercent;
+    Serial.print("add: ");
+    Serial.println(add);
+    int brightness = add;
+
+    while(count > 0) {
+        int led = clock->back(start, count);
+        Serial.println(brightness);
+        strip.setPixelColor(led, brightness / 2, 0, brightness);
+        strip.show();
+        delay(20);
+        count--;
+        brightness += add;
+    }
+}
  
 void loop () {
     DateTime now = RTC.now();  
@@ -64,47 +81,29 @@ void loop () {
         syncLoop = false;
     }
 
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(' ');
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println();
-    
     clearStrip();
 
     uint8_t value = now.minute();
     long minutes = mapRange(value, 0, 60, 0, PIXELS);
+    long start = minutes;
 
     for(int i = 0; i < 2; i++) {
-        strip.setPixelColor(minutes, 0, 80, 0);
-        minutes = clock->back(minutes, i);
+        strip.setPixelColor(minutes, 0, 20, 0);
+        minutes = clock->back(start, i + 1);
     }
 
     value = now.hour() % 12;
-    uint8_t hours = value * 2;
-    strip.setPixelColor(hours, 80, 0, 0);
+    int hours = round(value * 2);
+    strip.setPixelColor(hours, 10, 0, 0);
     
     strip.show();
     delay(200);
     
     value = now.second();
     long seconds = mapRange(value, 0, 60, 0, PIXELS);
+    fadeIn(seconds, 5, 200);
 
-    for(int i = 0; i < 3; i++) {
-        strip.setPixelColor(seconds, 50, 0, 80);
-        seconds = clock->back(seconds, i);
-    }
-
-    strip.show();
-
-    delay(800);
+    delay(1000 - 200 - 20 * 4);
     loopCount++;
     if(loopCount >= SYNC_MAX) {
         syncLoop = true;
