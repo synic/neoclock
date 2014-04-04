@@ -66,7 +66,7 @@ long mapRange(double x, double in_min, double in_max, double out_min,
 /**
  * Blends two colors.
  * 
- * This code was borroed from Kevin Alford - https://github.com/zeroeth
+ * This code was borrowed from Kevin Alford - https://github.com/zeroeth
  */
 uint32_t blend(uint32_t color1, uint32_t color2) {
     uint8_t r1, g1, b1;
