@@ -52,19 +52,26 @@ long mapRange(double x, double in_min, double in_max, double out_min,
 }
 
 void fadeIn(int start, int count, int endPercent) {
-    int add = (count / (float)endPercent) * (float)endPercent;
+    int add = (float)endPercent / count;
     Serial.print("add: ");
     Serial.println(add);
     int brightness = add;
 
+    int first = true;
     while(count > 0) {
         int led = clock->back(start, count);
         Serial.println(brightness);
         strip.setPixelColor(led, brightness / 2, 0, brightness);
+
+        if(!first) {
+            strip.setPixelColor(clock->back(led, 2), 1, 0, 1);
+            if(count == 1) strip.setPixelColor(clock->back(led, 1), 1, 0, 1);
+        }
         strip.show();
-        delay(20);
+        delay(35);
         count--;
         brightness += add;
+        first = false;
     }
 }
  
@@ -101,9 +108,9 @@ void loop () {
     
     value = now.second();
     long seconds = mapRange(value, 0, 60, 0, PIXELS);
-    fadeIn(seconds, 5, 200);
+    fadeIn(seconds, 12, 100);
 
-    delay(1000 - 200 - 20 * 4);
+    delay(1000 - 200 - 12 * 35);
     loopCount++;
     if(loopCount >= SYNC_MAX) {
         syncLoop = true;
