@@ -93,11 +93,15 @@ void fadeIn(uint8_t start, uint8_t count, uint8_t _end) {
         uint8_t led = clock.back(start, count);
         uint32_t color = strip.Color(brightness / 2, 0, brightness);
         
-        setColor(led, color);
+        setColor(led, color, false);
 
         if(!first) {
-            setColor(clock.back(led, 2), OFF_COLOR);
-            if(count == 1) setColor(clock.back(led, 1), OFF_COLOR);
+            uint8_t newled = clock.back(led, 2);
+            setColor(newled, currentColors[newled]);
+            if(count == 1) {
+                newled = clock.back(led, 1);
+                setColor(newled, currentColors[newled]);
+            }
         }
         strip.show();
         delay(35);
@@ -107,16 +111,23 @@ void fadeIn(uint8_t start, uint8_t count, uint8_t _end) {
     }
 }
 
-void setColor(uint8_t led, uint32_t color) {
+void setColor(uint8_t led, uint32_t color, boolean setCurrent) {
     if(color != OFF_COLOR) {
         if(currentColors[led] != OFF_COLOR) {
             color = blend(currentColors[led], color);
         }
     }
 
-    currentColors[led] = color;
+    if(setCurrent) {
+        currentColors[led] = color;
+    }
+
     strip.setPixelColor(led, color);
 } 
+
+void setColor(uint8_t led, uint32_t color) {
+    setColor(led, color, true);
+}
  
 void loop () {
     DateTime now = RTC.now();  
