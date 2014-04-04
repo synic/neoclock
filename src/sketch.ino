@@ -1,13 +1,22 @@
 #include <Adafruit_NeoPixel.h> 
 #include <Wire.h>
-#include "RTClib.h"
+#include <math.h>
 
- 
+#include "RTClib.h"
+#include "RoundClock.h"
+
+// constants
+const uint8_t PIXELS = 24;
+const uint8_t NEO_PIN = 13;
+const unsigned int SYNC_MAX = 18000; // 5 hours
+
+// other variables
 RTC_DS1307 RTC;
-uint8_t PIXELS = 24;
-uint8_t NEO_PIN = 13;
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, NEO_PIN, NEO_GRB + NEO_KHZ800);
-boolean first = true;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
+    NEO_PIN, NEO_GRB + NEO_KHZ800);
+boolean syncLoop = true;
+unsigned int loopCount = 0;
+RoundClock *clock = new RoundClock();
  
 void setup () {
     Serial.begin(9600);
@@ -16,61 +25,94 @@ void setup () {
     strip.begin();
     strip.show();
  
-  if (! RTC.isrunning()) {
-    Serial.println("RTC is NOT running!");
-    // following line sets the RTC to the date & time this sketch was compiled
-    //RTC.adjust(DateTime(__DATE__, __TIME__));
-  }
- 
+    if (! RTC.isrunning()) {
+        Serial.println("RTC is NOT running!");
+        // following line sets the RTC to the date & time this 
+        // sketch was compiled
+        RTC.adjust(DateTime(__DATE__, __TIME__));
+    }
+
+    for(int i = 0; i < PIXELS; i++) {
+        clock->add(i);
+    }
+    
+    clock->done();
 }
 
 void clearStrip() {
-  for(int i = 0; i < PIXELS; i++) {
-    strip.setPixelColor(i, 1, 0, 1);
-  }
+    for(int i = 0; i < PIXELS; i++) {
+        strip.setPixelColor(i, 1, 0, 1);
+    }
+}
+
+long mapRange(double x, double in_min, double in_max, double out_min,
+    double out_max) {
+    return round((x - in_min) * (out_max - out_min) / (in_max - in_min) +
+        out_min);
+}
+
+void fadeIn(int start, int count, int endPercent) {
+    int add = (float)endPercent / count;
+    Serial.print("add: ");
+    Serial.println(add);
+    int brightness = add;
+
+    int first = true;
+    while(count > 0) {
+        int led = clock->back(start, count);
+        Serial.println(brightness);
+        strip.setPixelColor(led, brightness / 2, 0, brightness);
+
+        if(!first) {
+            strip.setPixelColor(clock->back(led, 2), 1, 0, 1);
+            if(count == 1) strip.setPixelColor(clock->back(led, 1), 1, 0, 1);
+        }
+        strip.show();
+        delay(35);
+        count--;
+        brightness += add;
+        first = false;
+    }
 }
  
 void loop () {
     DateTime now = RTC.now();  
-    if(first) {
-       uint8_t start = now.second();
-       while(now.second() == start) {
-         now = RTC.now();
-       }
-       first = false;
-    }
-  
 
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(' ');
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println();
-    
+    // here we sync up the time so that each loop happens more-or-less at the
+    // top of each second.
+    if(syncLoop) {
+        uint8_t start = now.second();
+        while(now.second() == start) {
+            now = RTC.now();
+        }
+        syncLoop = false;
+    }
+
     clearStrip();
 
     uint8_t value = now.minute();
-    uint8_t minutes = map(value, 0, 60, 0, PIXELS);
-    strip.setPixelColor((int)minutes, 0, 80, 0);
-    
+    long minutes = mapRange(value, 0, 60, 0, PIXELS);
+    long start = minutes;
+
+    for(int i = 0; i < 2; i++) {
+        strip.setPixelColor(minutes, 0, 20, 0);
+        minutes = clock->back(start, i + 1);
+    }
+
     value = now.hour() % 12;
-    uint8_t hours = value * 2;
-    strip.setPixelColor((int)hours, 80, 0, 0);
+    int hours = round(value * 2);
+    strip.setPixelColor(hours, 10, 0, 0);
     
     strip.show();
     delay(200);
     
     value = now.second();
-    uint8_t seconds = map(value, 0, 60, 0, PIXELS);
-    strip.setPixelColor((int)seconds, 50, 0, 80);
-    strip.show();
+    long seconds = mapRange(value, 0, 60, 0, PIXELS);
+    fadeIn(seconds, 12, 100);
 
-    delay(800);
+    delay(1000 - 200 - 12 * 35);
+    loopCount++;
+    if(loopCount >= SYNC_MAX) {
+        syncLoop = true;
+    }
 }
