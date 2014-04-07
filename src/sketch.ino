@@ -10,25 +10,28 @@ const uint8_t NEO_PIN = 13;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 
-const uint8_t SYNC_MAX = 18000; // 5 hours
-const uint8_t FADE_PAUSE = 65;
+const uint16_t SYNC_MAX = 18000; // 5 hours
+const uint16_t FADE_PAUSE = 500;
 
 // colors
 const uint32_t OFF_COLOR = strip.Color(1, 0, 1);
-const uint32_t MINUTES_COLOR = strip.Color(0, 20, 0);  
-const uint32_t HOURS_COLOR = strip.Color(10, 0, 0);
+const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
+const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
 // number of LEDs for each hand
-const uint32_t MINUTES_LEDS = 2;
-const uint32_t HOURS_LEDS = 1;
-const uint32_t SECONDS_LEDS = 6;
+const uint8_t MINUTES_LEDS = 2;
+const uint8_t HOURS_LEDS = 1;
+const uint8_t SECONDS_LEDS = 18;
+const uint8_t MAX_BRIGHTNESS = 60;
+
+const uint16_t FADE_TIME = 500;
 
 // other variables
 RTC_DS1307 RTC;
 boolean syncLoop = true;
-uint8_t loopCount = 0;
+uint32_t loopCount = 0;
 RoundClock clock = RoundClock();
-uint8_t *currentColors = new uint8_t[PIXELS] {0};
+uint32_t *currentColors = new uint32_t[PIXELS] {0};
  
 void setup () {
     Serial.begin(9600);
@@ -37,7 +40,7 @@ void setup () {
     strip.begin();
     strip.show();
  
-    if (! RTC.isrunning()) {
+    if(!RTC.isrunning()) {
         // following line sets the RTC to the date & time this 
         // sketch was compiled
         RTC.adjust(DateTime(__DATE__, __TIME__));
@@ -55,6 +58,7 @@ void clearStrip() {
         currentColors[i] = OFF_COLOR;
         strip.setPixelColor(i, OFF_COLOR);
     }
+
 }
 
 long mapRange(double x, double in_min, double in_max, double out_min,
@@ -87,24 +91,26 @@ uint32_t blend(uint32_t color1, uint32_t color2) {
 void fadeIn(uint8_t start, uint8_t count, uint8_t _end) {
     uint8_t add = (float)_end / count;
     uint8_t brightness = add;
+    uint16_t _delay = (uint16_t)(FADE_TIME / (double)count - 1); 
+    Serial.println(_delay);
 
     uint8_t first = true;
     while(count > 0) {
         uint8_t led = clock.back(start, count);
-        uint32_t color = strip.Color(brightness / 2, 0, brightness);
+        uint32_t color = strip.Color(brightness, 0, brightness / 2);
         
         setColor(led, color, false);
 
         if(!first) {
             uint8_t newled = clock.back(led, 2);
-            setColor(newled, currentColors[newled]);
+            strip.setPixelColor(newled, currentColors[newled]);
             if(count == 1) {
                 newled = clock.back(led, 1);
-                setColor(newled, currentColors[newled]);
+                strip.setPixelColor(newled, currentColors[newled]);
             }
         }
         strip.show();
-        delay(35);
+        delay(_delay);
         count--;
         brightness += add;
         first = false;
@@ -163,13 +169,12 @@ void loop () {
     }
     
     strip.show();
-    delay(200);
     
     value = now.second();
     uint8_t seconds = mapRange(value, 0, 60, 0, PIXELS);
-    fadeIn(seconds, 12, 100);
+    fadeIn(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
 
-    delay(1000 - 200 - 12 * 35);
+    delay(500);
     loopCount++;
     if(loopCount >= SYNC_MAX) {
         syncLoop = true;
