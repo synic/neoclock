@@ -1,1 +1,11 @@
 .build/
+*.bak
+_autosave*
+*.zip
+*.dsn
+*.ses
+*.kicad_pcb-bak
+*-cache.lib
+*.bck
+$adon.sch
+gerber/

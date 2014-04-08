@@ -1,0 +1,171 @@
+Cmp-Mod V01 Created by Cvpcb (2014-04-07 BZR 4790)-product   date = Tue 08 Apr 2014 09:43:10 AM MDT
+
+BeginCmp
+TimeStamp = /534356E2;
+Reference = BT1;
+ValeurCmp = BATTERY;
+IdModule  = Discret:CR1220;
+EndCmp
+
+BeginCmp
+TimeStamp = /53435318;
+Reference = C1;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /534352CE;
+Reference = C2;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343FADD;
+Reference = C3;
+ValeurCmp = 100uF;
+IdModule  = Capacitors_SMD:c_elec_5x5.3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343FAEF;
+Reference = C4;
+ValeurCmp = 10uF;
+IdModule  = Capacitors_SMD:c_elec_3x5.3;
+EndCmp
+
+BeginCmp
+TimeStamp = /534353D7;
+Reference = C5;
+ValeurCmp = 22pF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /534353E2;
+Reference = C6;
+ValeurCmp = 22pF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /53435742;
+Reference = C7;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343FA98;
+Reference = CON1;
+ValeurCmp = 2.1mm 5V;
+IdModule  = Connect:BARREL_JACK;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343F9E6;
+Reference = D1;
+ValeurCmp = PWR;
+IdModule  = LEDs:LED-0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /53435199;
+Reference = IC1;
+ValeurCmp = ATMEGA328P-A;
+IdModule  = SMD_Packages:TQFP32;
+EndCmp
+
+BeginCmp
+TimeStamp = /534413EB;
+Reference = JP1;
+ValeurCmp = AUTOBRGT;
+IdModule  = Connect:SIL-3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343FC4E;
+Reference = K1;
+ValeurCmp = NEOPIXEL;
+IdModule  = Connect:SIL-3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343FD28;
+Reference = P1;
+ValeurCmp = ICSP;
+IdModule  = Pin_Arrays:pin_array_3x2;
+EndCmp
+
+BeginCmp
+TimeStamp = /53440FCF;
+Reference = PHOTOR1;
+ValeurCmp = PHOTOR;
+IdModule  = ;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343F9D2;
+Reference = R1;
+ValeurCmp = 330;
+IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering_RevA_Date21Jun2010;
+EndCmp
+
+BeginCmp
+TimeStamp = /53435901;
+Reference = R2;
+ValeurCmp = 10k;
+IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering_RevA_Date21Jun2010;
+EndCmp
+
+BeginCmp
+TimeStamp = /53440FF1;
+Reference = R3;
+ValeurCmp = 10k;
+IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering_RevA_Date21Jun2010;
+EndCmp
+
+BeginCmp
+TimeStamp = /53441167;
+Reference = RV1;
+ValeurCmp = POT;
+IdModule  = ;
+EndCmp
+
+BeginCmp
+TimeStamp = /53441535;
+Reference = SW1;
+ValeurCmp = HOUR;
+IdModule  = Discret:SW_PUSH_SMALL;
+EndCmp
+
+BeginCmp
+TimeStamp = /53441547;
+Reference = SW2;
+ValeurCmp = MINUTE;
+IdModule  = Discret:SW_PUSH_SMALL;
+EndCmp
+
+BeginCmp
+TimeStamp = /53435651;
+Reference = U1;
+ValeurCmp = DS1307;
+IdModule  = SOIC8:Test;
+EndCmp
+
+BeginCmp
+TimeStamp = /534353C5;
+Reference = X1;
+ValeurCmp = 16Mhz;
+IdModule  = Crystals:Crystal_HC49-U_Vertical_3Pin_RevA_09Aug2010;
+EndCmp
+
+BeginCmp
+TimeStamp = /5343574A;
+Reference = X2;
+ValeurCmp = 32.768kHz;
+IdModule  = Crystals:Crystal_Round_Horizontal_3mm_RevA_25Apr2012;
+EndCmp
+
+EndListe
