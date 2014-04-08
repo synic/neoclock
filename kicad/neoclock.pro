@@ -1,4 +1,4 @@
-update=Mon 07 Apr 2014 07:51:16 PM MDT
+update=Tue 08 Apr 2014 09:02:31 AM MDT
 version=1
 last_client=eeschema
 [general]
@@ -89,4 +89,5 @@ LibName27=opto
 LibName28=atmel
 LibName29=contrib
 LibName30=valves
-LibName31=/home/synic/Projects/kicad/libraries/schematic/ds1307timer-cache
+LibName31=/home/synic/Projects/kicad/libraries/schematic/ds1307timer
+LibName32=/home/synic/Projects/kicad/libraries/schematic/open-project
