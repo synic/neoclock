@@ -1,10 +1,10 @@
-Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4790)-product date = Wed 09 Apr 2014 02:15:12 PM MDT
+Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Wed 09 Apr 2014 06:53:08 PM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
 Reference = BT1;
 ValeurCmp = BATTERY;
-IdModule  = Discret:CR2032H;
+IdModule  = WANDL:WNL_CR2302_TH_KEYSTONE_3003;
 EndCmp
 
 BeginCmp
@@ -116,7 +116,7 @@ BeginCmp
 TimeStamp = /53440FCF;
 Reference = PHOTOR1;
 ValeurCmp = PHOTOR;
-IdModule  = ;
+IdModule  = synic:PHOTORESISTOR;
 EndCmp
 
 BeginCmp
@@ -144,7 +144,7 @@ BeginCmp
 TimeStamp = /53441167;
 Reference = RV1;
 ValeurCmp = POT;
-IdModule  = ;
+IdModule  = synic:Timmer_Pot_ST32ETA103;
 EndCmp
 
 BeginCmp
@@ -172,14 +172,14 @@ BeginCmp
 TimeStamp = /534353C5;
 Reference = X1;
 ValeurCmp = 16Mhz;
-IdModule  = Crystals:Crystal_HC49-U_Vertical_3Pin_RevA_09Aug2010;
+IdModule  = Crystals:Crystal_HC49-U_Vertical_3Pin;
 EndCmp
 
 BeginCmp
 TimeStamp = /5343574A;
 Reference = X2;
 ValeurCmp = 32.768kHz;
-IdModule  = Crystals:Crystal_Round_Horizontal_3mm_RevA_25Apr2012;
+IdModule  = Crystals:Crystal_Round_Horizontal_3mm_BigPad;
 EndCmp
 
 EndListe

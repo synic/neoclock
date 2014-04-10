@@ -1,4 +1,4 @@
-update=Tue 08 Apr 2014 09:02:31 AM MDT
+update=Tue 08 Apr 2014 09:35:07 PM MDT
 version=1
 last_client=eeschema
 [general]
@@ -52,7 +52,7 @@ version=1
 PageLayoutDescrFile=
 SubpartIdSeparator=0
 SubpartFirstId=65
-LibDir=
+LibDir=/home/synic/Projects/kicad/libraries/schematic
 NetFmtName=
 RptD_X=0
 RptD_Y=100
