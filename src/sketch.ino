@@ -5,7 +5,7 @@
 #include "RTClib.h"
 #include "RoundClock.h"
 
-const uint8_t PIXELS = 24;
+const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 13;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
@@ -15,6 +15,7 @@ const uint16_t FADE_PAUSE = 500;
 
 // colors
 const uint32_t OFF_COLOR = strip.Color(1, 0, 1);
+const uint32_t FIVE_COLOR = strip.Color(10, 0, 10);
 const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
@@ -55,8 +56,15 @@ void setup () {
 
 void clearStrip() {
     for(uint8_t i = 0; i < PIXELS; i++) {
-        currentColors[i] = OFF_COLOR;
-        strip.setPixelColor(i, OFF_COLOR);
+        uint32_t color = OFF_COLOR;
+
+        if(i % 5 == 0) {
+            color = FIVE_COLOR;
+        }
+
+        currentColors[i] = color;
+
+        strip.setPixelColor(i, color);
     }
 
 }
@@ -150,8 +158,7 @@ void loop () {
 
     clearStrip();
 
-    uint8_t value = now.minute();
-    uint8_t minutes = mapRange(value, 0, 60, 0, PIXELS);
+    uint8_t minutes = now.minute();
     uint8_t start = minutes;
 
     for(uint8_t i = 0; i < MINUTES_LEDS; i++) {
@@ -159,19 +166,22 @@ void loop () {
         minutes = clock.back(start, i + 1);
     }
 
-    value = now.hour() % 12;
-    uint8_t hours = round(value * 2);
+    float percent = minutes / 60.0;
+
+    uint8_t hours = (now.hour() % 12) * 5;
+    hours += 5 * percent;
+
     start = hours;
 
     for(uint8_t i = 0; i < HOURS_LEDS; i++) { 
         setColor(hours, HOURS_COLOR);
         hours = clock.back(start, i + 1); 
     }
+
     
     strip.show();
     
-    value = now.second();
-    uint8_t seconds = mapRange(value, 0, 60, 0, PIXELS);
+    uint8_t seconds = now.second();
     fadeIn(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
 
     delay(500);
