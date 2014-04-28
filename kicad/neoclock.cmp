@@ -1,10 +1,10 @@
-Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Mon 28 Apr 2014 10:17:19 AM MDT
+Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Mon 28 Apr 2014 03:50:58 PM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
 Reference = BT1;
 ValeurCmp = BATTERY;
-IdModule  = WANDL:WNL_CR2302_TH_KEYSTONE_3003;
+IdModule  = synic:WNL_CR2302_TH_KEYSTONE_3003;
 EndCmp
 
 BeginCmp
