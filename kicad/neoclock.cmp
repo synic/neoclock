@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4790)-product date = Thu 10 Apr 2014 09:02:13 AM MDT
+Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Mon 28 Apr 2014 10:17:19 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -88,14 +88,14 @@ BeginCmp
 TimeStamp = /534413EB;
 Reference = JP1;
 ValeurCmp = AUTOBRGT;
-IdModule  = Connect:SIL-3;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x03;
 EndCmp
 
 BeginCmp
 TimeStamp = /5343FC4E;
 Reference = K1;
 ValeurCmp = NEOPIXEL;
-IdModule  = Connect:SIL-3;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x03;
 EndCmp
 
 BeginCmp
@@ -109,7 +109,7 @@ BeginCmp
 TimeStamp = /53444226;
 Reference = P2;
 ValeurCmp = FTDI;
-IdModule  = Connect:SIL-6;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x06;
 EndCmp
 
 BeginCmp
@@ -151,35 +151,35 @@ BeginCmp
 TimeStamp = /53441535;
 Reference = SW1;
 ValeurCmp = HOUR;
-IdModule  = Discret:SW_PUSH_SMALL;
+IdModule  = synic:SW_PUSH_SMALL;
 EndCmp
 
 BeginCmp
 TimeStamp = /53441547;
 Reference = SW2;
 ValeurCmp = MINUTE;
-IdModule  = Discret:SW_PUSH_SMALL;
+IdModule  = synic:SW_PUSH_SMALL;
 EndCmp
 
 BeginCmp
 TimeStamp = /53435651;
 Reference = U1;
 ValeurCmp = DS1307;
-IdModule  = SOIC8:Test;
+IdModule  = SOIC_Packages:SOIC-8_N;
 EndCmp
 
 BeginCmp
 TimeStamp = /534353C5;
 Reference = X1;
 ValeurCmp = 16Mhz;
-IdModule  = Crystals:Crystal_HC49-U_Vertical_3Pin;
+IdModule  = synic:Crystal_HC49-SMALL_SMD;
 EndCmp
 
 BeginCmp
 TimeStamp = /5343574A;
 Reference = X2;
 ValeurCmp = 32.768kHz;
-IdModule  = Crystals:Crystal_Round_Horizontal_3mm_BigPad;
+IdModule  = synic:Crystal-4pad;
 EndCmp
 
 EndListe
