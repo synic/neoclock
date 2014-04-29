@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Mon 28 Apr 2014 03:50:58 PM MDT
+Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Tue 29 Apr 2014 10:44:50 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -95,7 +95,7 @@ BeginCmp
 TimeStamp = /5343FC4E;
 Reference = K1;
 ValeurCmp = NEOPIXEL;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x03;
+IdModule  = synic:jst-3-pth-ra;
 EndCmp
 
 BeginCmp
