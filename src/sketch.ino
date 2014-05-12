@@ -6,7 +6,7 @@
 #include "RoundClock.h"
 
 const uint8_t PIXELS = 60;
-const uint8_t NEO_PIN = 13;
+const uint8_t NEO_PIN = 6;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -40,12 +40,18 @@ void setup () {
     RTC.begin();
     strip.begin();
     strip.show();
+
+    Serial.println("Before setting clock");
  
+    RTC.adjust(DateTime(__DATE__, __TIME__));
     if(!RTC.isrunning()) {
         // following line sets the RTC to the date & time this 
         // sketch was compiled
+        Serial.println("Setting clock from compile time.");
         RTC.adjust(DateTime(__DATE__, __TIME__));
     }
+
+    Serial.println(RTC.isrunning());
 
     for(uint8_t i = 0; i < PIXELS; i++) {
         clock.add(i);
@@ -145,16 +151,27 @@ void setColor(uint8_t led, uint32_t color) {
  
 void loop () {
     DateTime now = RTC.now();  
+    Serial.println("Starting the loop...");
 
     // here we sync up the time so that each loop happens more-or-less at the
     // top of each second.
     if(syncLoop) {
+        Serial.println("Syncing...");
         uint8_t start = now.second();
+
+        Serial.print("Start is: ");
+        Serial.print(now.second());
+        Serial.print(" ");
+        Serial.println(start);
         while(now.second() == start) {
             now = RTC.now();
+            Serial.println(now.second());
         }
         syncLoop = false;
     }
+
+    Serial.println(now.second());
+    Serial.println("fuck");
 
     clearStrip();
 
