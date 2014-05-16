@@ -7,6 +7,9 @@
 
 const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
+const uint8_t AUTOBRIGHT_PIN = 5;
+const uint8_t LIGHTSENSOR_PIN = A3;
+const uint8_t ROTATE = 6;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -35,6 +38,10 @@ RoundClock clock = RoundClock();
 uint32_t *currentColors = new uint32_t[PIXELS] {0};
  
 void setup () {
+    // set up pins
+    pinMode(AUTOBRIGHT_PIN, INPUT_PULLUP);
+    pinMode(LIGHTSENSOR_PIN, INPUT);
+
     Serial.begin(9600);
     Wire.begin();
     RTC.begin();
@@ -43,7 +50,7 @@ void setup () {
 
     Serial.println("Before setting clock");
  
-    RTC.adjust(DateTime(__DATE__, __TIME__));
+    //RTC.adjust(DateTime(__DATE__, __TIME__));
     if(!RTC.isrunning()) {
         // following line sets the RTC to the date & time this 
         // sketch was compiled
@@ -106,7 +113,6 @@ void fadeIn(uint8_t start, uint8_t count, uint8_t _end) {
     uint8_t add = (float)_end / count;
     uint8_t brightness = add;
     uint16_t _delay = (uint16_t)(FADE_TIME / (double)count - 1); 
-    Serial.println(_delay);
 
     uint8_t first = true;
     while(count > 0) {
@@ -170,12 +176,22 @@ void loop () {
         syncLoop = false;
     }
 
+    // check for auto brightness, and if it's set, set the brightness
+    // according to the light sensor
+    if(digitalRead(AUTOBRIGHT_PIN) == LOW) {
+        int value = analogRead(LIGHTSENSOR_PIN);
+        value = map(value, 0, 1023, 0, 255);
+        strip.setBrightness(255 - value);
+    }
+
     Serial.println(now.second());
-    Serial.println("fuck");
 
     clearStrip();
 
     uint8_t minutes = now.minute();
+    float percent = minutes / 60.0;
+
+    minutes = clock.forward(minutes, ROTATE * 5);
     uint8_t start = minutes;
 
     for(uint8_t i = 0; i < MINUTES_LEDS; i++) {
@@ -183,22 +199,24 @@ void loop () {
         minutes = clock.back(start, i + 1);
     }
 
-    float percent = minutes / 60.0;
 
     uint8_t hours = (now.hour() % 12) * 5;
-    hours += 5 * percent;
+    hours = clock.forward(hours, ROTATE * 5);
 
+    hours += 5 * percent;
     start = hours;
 
     for(uint8_t i = 0; i < HOURS_LEDS; i++) { 
         setColor(hours, HOURS_COLOR);
         hours = clock.back(start, i + 1); 
     }
-
     
     strip.show();
     
     uint8_t seconds = now.second();
+
+    seconds = clock.forward(seconds, ROTATE * 5);
+
     fadeIn(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
 
     delay(500);
