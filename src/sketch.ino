@@ -181,7 +181,7 @@ void loop () {
     if(digitalRead(AUTOBRIGHT_PIN) == LOW) {
         int value = analogRead(LIGHTSENSOR_PIN);
         value = map(value, 0, 1023, 0, 255);
-        strip.setBrightness(255 - value);
+        strip.setBrightness(value);
     }
 
     Serial.println(now.second());
