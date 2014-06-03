@@ -1,10 +1,10 @@
-Cmp-Mod V01 Created by CvPcb (2014-04-07 BZR 4791)-product date = Tue 29 Apr 2014 10:44:50 AM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-05-27 BZR 4891)-product   date = Tue 03 Jun 2014 10:02:44 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
 Reference = BT1;
 ValeurCmp = BATTERY;
-IdModule  = synic:WNL_CR2302_TH_KEYSTONE_3003;
+IdModule  = synic:BK-755_12mm_coincell;
 EndCmp
 
 BeginCmp
@@ -57,17 +57,10 @@ IdModule  = Capacitors_SMD:c_0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /534444CA;
-Reference = C8;
-ValeurCmp = 100nF;
-IdModule  = Capacitors_SMD:c_0805;
-EndCmp
-
-BeginCmp
 TimeStamp = /5343FA98;
 Reference = CON1;
 ValeurCmp = 2.1mm 5V;
-IdModule  = Connect:BARREL_JACK;
+IdModule  = synic:BARREL_JACK_SMD;
 EndCmp
 
 BeginCmp
@@ -85,13 +78,6 @@ IdModule  = SMD_Packages:TQFP32;
 EndCmp
 
 BeginCmp
-TimeStamp = /534413EB;
-Reference = JP1;
-ValeurCmp = AUTOBRGT;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x03;
-EndCmp
-
-BeginCmp
 TimeStamp = /5343FC4E;
 Reference = K1;
 ValeurCmp = NEOPIXEL;
@@ -103,13 +89,6 @@ TimeStamp = /5343FD28;
 Reference = P1;
 ValeurCmp = ICSP;
 IdModule  = Pin_Headers:Pin_Header_Straight_2x03;
-EndCmp
-
-BeginCmp
-TimeStamp = /53444226;
-Reference = P2;
-ValeurCmp = FTDI;
-IdModule  = Pin_Headers:Pin_Header_Straight_1x06;
 EndCmp
 
 BeginCmp
@@ -141,24 +120,17 @@ IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
 EndCmp
 
 BeginCmp
-TimeStamp = /53441167;
-Reference = RV1;
-ValeurCmp = POT;
-IdModule  = synic:Timmer_Pot_ST32ETA103;
-EndCmp
-
-BeginCmp
 TimeStamp = /53441535;
 Reference = SW1;
 ValeurCmp = HOUR;
-IdModule  = synic:SW_PUSH_SMALL;
+IdModule  = synic:SMD_PUSHBUTTON_MINI;
 EndCmp
 
 BeginCmp
 TimeStamp = /53441547;
 Reference = SW2;
 ValeurCmp = MINUTE;
-IdModule  = synic:SW_PUSH_SMALL;
+IdModule  = synic:SMD_PUSHBUTTON_MINI;
 EndCmp
 
 BeginCmp
@@ -172,14 +144,14 @@ BeginCmp
 TimeStamp = /534353C5;
 Reference = X1;
 ValeurCmp = 16Mhz;
-IdModule  = synic:Crystal_HC49-SMALL_SMD;
+IdModule  = synic:4padCrystalSMD_7.0x5.0mm;
 EndCmp
 
 BeginCmp
 TimeStamp = /5343574A;
 Reference = X2;
 ValeurCmp = 32.768kHz;
-IdModule  = synic:Crystal-4pad;
+IdModule  = synic:4padCrystalSMD_7.0x5.0mm;
 EndCmp
 
 EndListe
