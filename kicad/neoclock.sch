@@ -31,6 +31,7 @@ LIBS:contrib
 LIBS:valves
 LIBS:ds1307timer
 LIBS:open-project
+LIBS:neoclock-cache
 EELAYER 24 0
 EELAYER END
 $Descr A4 11693 8268
@@ -769,14 +770,6 @@ $EndComp
 Wire Wire Line
 	750  2100 850  2100
 Connection ~ 850  2100
-Text GLabel 3800 2850 2    60   BiDi ~ 0
-FTDI3
-Wire Wire Line
-	3450 2850 3800 2850
-Text GLabel 3800 2950 2    60   BiDi ~ 0
-FTDI2
-Wire Wire Line
-	3800 2950 3450 2950
 Connection ~ 5500 2800
 $Comp
 L DS1307 U1
@@ -791,4 +784,5 @@ F 3 "" H 8500 2500 60  0000 C CNN
 $EndComp
 NoConn ~ 3450 3350
 NoConn ~ 3450 2300
+NoConn ~ 3450 2850
 $EndSCHEMATC
