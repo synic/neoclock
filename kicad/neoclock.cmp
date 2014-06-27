@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (2014-06-03 BZR 4917)-product   date = Thu 05 Jun 2014 02:20:12 PM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-06-19 BZR 4949)-product   date = Fri 27 Jun 2014 10:26:21 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -15,13 +15,6 @@ IdModule  = Capacitors_SMD:c_0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /534352CE;
-Reference = C2;
-ValeurCmp = 100nF;
-IdModule  = Capacitors_SMD:c_0805;
-EndCmp
-
-BeginCmp
 TimeStamp = /5343FADD;
 Reference = C3;
 ValeurCmp = 100uF;
@@ -32,7 +25,7 @@ BeginCmp
 TimeStamp = /5343FAEF;
 Reference = C4;
 ValeurCmp = 10uF;
-IdModule  = Capacitors_SMD:c_elec_3x5.3;
+IdModule  = Capacitors_Tantalum_SMD:TantalC_SizeA_EIA-3216_Reflow;
 EndCmp
 
 BeginCmp
@@ -71,10 +64,17 @@ IdModule  = LEDs:LED-0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /53435199;
+TimeStamp = /53AD8508;
+Reference = F1;
+ValeurCmp = FUSE;
+IdModule  = synic:1206_polyfuse;
+EndCmp
+
+BeginCmp
+TimeStamp = /53AD8842;
 Reference = IC1;
-ValeurCmp = ATMEGA328P-A;
-IdModule  = SMD_Packages:TQFP32;
+ValeurCmp = ATTINY84-S;
+IdModule  = SMD_Packages:SO14N;
 EndCmp
 
 BeginCmp
@@ -102,35 +102,35 @@ BeginCmp
 TimeStamp = /5343F9D2;
 Reference = R1;
 ValeurCmp = 330;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53435901;
 Reference = R2;
 ValeurCmp = 10k;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53440FF1;
 Reference = R3;
 ValeurCmp = 10k;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53441535;
 Reference = SW1;
 ValeurCmp = HOUR;
-IdModule  = synic:SMD_PUSHBUTTON_MINI;
+IdModule  = synic:KMR2_MICROMINIATURE_BUTTON;
 EndCmp
 
 BeginCmp
 TimeStamp = /53441547;
 Reference = SW2;
 ValeurCmp = MINUTE;
-IdModule  = synic:SMD_PUSHBUTTON_MINI;
+IdModule  = synic:KMR2_MICROMINIATURE_BUTTON;
 EndCmp
 
 BeginCmp
