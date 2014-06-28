@@ -7,7 +7,6 @@
 
 const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
-const uint8_t AUTOBRIGHT_PIN = 5;
 const uint8_t LIGHTSENSOR_PIN = A3;
 const uint8_t ROTATE = 6;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
@@ -17,8 +16,8 @@ const uint16_t SYNC_MAX = 18000; // 5 hours
 const uint16_t FADE_PAUSE = 500;
 
 // colors
-const uint32_t OFF_COLOR = strip.Color(1, 0, 1);
-const uint32_t FIVE_COLOR = strip.Color(10, 0, 10);
+const uint32_t OFF_COLOR = strip.Color(2, 0, 2);
+const uint32_t FIVE_COLOR = strip.Color(12, 0, 12);
 const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
@@ -39,7 +38,6 @@ uint32_t *currentColors = new uint32_t[PIXELS] {0};
  
 void setup () {
     // set up pins
-    pinMode(AUTOBRIGHT_PIN, INPUT_PULLUP);
     pinMode(LIGHTSENSOR_PIN, INPUT);
 
     Serial.begin(9600);
@@ -48,9 +46,9 @@ void setup () {
     strip.begin();
     strip.show();
 
-    Serial.println("Before setting clock");
+    //Serial.println("Before setting clock");
  
-    //RTC.adjust(DateTime(__DATE__, __TIME__));
+    RTC.adjust(DateTime(__DATE__, __TIME__));
     if(!RTC.isrunning()) {
         // following line sets the RTC to the date & time this 
         // sketch was compiled
@@ -58,7 +56,7 @@ void setup () {
         RTC.adjust(DateTime(__DATE__, __TIME__));
     }
 
-    Serial.println(RTC.isrunning());
+    //Serial.println(RTC.isrunning());
 
     for(uint8_t i = 0; i < PIXELS; i++) {
         clock.add(i);
@@ -157,34 +155,22 @@ void setColor(uint8_t led, uint32_t color) {
  
 void loop () {
     DateTime now = RTC.now();  
-    Serial.println("Starting the loop...");
+    //Serial.println("Starting the loop...");
 
     // here we sync up the time so that each loop happens more-or-less at the
     // top of each second.
     if(syncLoop) {
-        Serial.println("Syncing...");
         uint8_t start = now.second();
-
-        Serial.print("Start is: ");
-        Serial.print(now.second());
-        Serial.print(" ");
-        Serial.println(start);
         while(now.second() == start) {
             now = RTC.now();
-            Serial.println(now.second());
         }
         syncLoop = false;
     }
 
-    // check for auto brightness, and if it's set, set the brightness
-    // according to the light sensor
-    if(digitalRead(AUTOBRIGHT_PIN) == LOW) {
-        int value = analogRead(LIGHTSENSOR_PIN);
-        value = map(value, 0, 1023, 0, 255);
-        strip.setBrightness(value);
-    }
-
-    Serial.println(now.second());
+    int value = analogRead(LIGHTSENSOR_PIN);
+    value = map(value, 1024, 0, 256, 100);
+    strip.setBrightness(value);
+    //strip.setBrightness(255);
 
     clearStrip();
 
@@ -198,7 +184,6 @@ void loop () {
         setColor(minutes, MINUTES_COLOR);
         minutes = clock.back(start, i + 1);
     }
-
 
     uint8_t hours = (now.hour() % 12) * 5;
     hours = clock.forward(hours, ROTATE * 5);
