@@ -9,6 +9,8 @@ const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
 const uint8_t LIGHTSENSOR_PIN = A3;
 const uint8_t ROTATE = 6;
+const uint8_t HOUR_BUTTON = 4;
+const uint8_t MINUTE_BUTTON = 3;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -16,8 +18,8 @@ const uint16_t SYNC_MAX = 18000; // 5 hours
 const uint16_t FADE_PAUSE = 500;
 
 // colors
-const uint32_t OFF_COLOR = strip.Color(1, 0, 1);
-const uint32_t FIVE_COLOR = strip.Color(10, 0, 10);
+const uint32_t OFF_COLOR = strip.Color(2, 0, 2);
+const uint32_t FIVE_COLOR = strip.Color(12, 0, 12);
 const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
@@ -31,13 +33,19 @@ const uint16_t FADE_TIME = 500;
 
 // other variables
 RTC_DS1307 RTC;
+const uint8_t BUTTONS[] = {HOUR_BUTTON, MINUTE_BUTTON};
 boolean syncLoop = true;
 uint32_t loopCount = 0;
 RoundClock clock = RoundClock();
 uint32_t *currentColors = new uint32_t[PIXELS] {0};
+unsigned long startMillis = 0;
+DateTime now;
  
 void setup () {
+    // set up pins
     pinMode(LIGHTSENSOR_PIN, INPUT);
+    pinMode(HOUR_BUTTON, INPUT_PULLUP);
+    pinMode(MINUTE_BUTTON, INPUT_PULLUP);
 
     Serial.begin(9600);
     Wire.begin();
@@ -45,14 +53,17 @@ void setup () {
     strip.begin();
     strip.show();
 
+    //Serial.println("Before setting clock");
  
-    //RTC.adjust(DateTime(__DATE__, __TIME__));
+    RTC.adjust(DateTime(__DATE__, __TIME__));
     if(!RTC.isrunning()) {
         // following line sets the RTC to the date & time this 
         // sketch was compiled
+        Serial.println("Setting clock from compile time.");
         RTC.adjust(DateTime(__DATE__, __TIME__));
     }
 
+    //Serial.println(RTC.isrunning());
 
     for(uint8_t i = 0; i < PIXELS; i++) {
         clock.add(i);
@@ -146,29 +157,11 @@ void setColor(uint8_t led, uint32_t color, boolean setCurrent) {
 } 
 
 void setColor(uint8_t led, uint32_t color) {
+    clearStrip();
     setColor(led, color, true);
 }
- 
-void loop () {
-    DateTime now = RTC.now();  
 
-    // here we sync up the time so that each loop happens more-or-less at the
-    // top of each second.
-    if(syncLoop) {
-        uint8_t start = now.second();
-
-        while(now.second() == start) {
-            now = RTC.now();
-        }
-        syncLoop = false;
-    }
-
-    int value = analogRead(LIGHTSENSOR_PIN);
-    value = map(value, 0, 1023, 0, 255);
-    strip.setBrightness(value);
-
-    clearStrip();
-
+void showHoursMinutes() {
     uint8_t minutes = now.minute();
     float percent = minutes / 60.0;
 
@@ -180,7 +173,6 @@ void loop () {
         minutes = clock.back(start, i + 1);
     }
 
-
     uint8_t hours = (now.hour() % 12) * 5;
     hours = clock.forward(hours, ROTATE * 5);
 
@@ -191,9 +183,88 @@ void loop () {
         setColor(hours, HOURS_COLOR);
         hours = clock.back(start, i + 1); 
     }
-    
+
     strip.show();
-    
+}
+
+void advance(uint8_t button) {
+    if(button == HOUR_BUTTON) {
+        uint8_t hour = now.hour() + 1;
+        if(hour > 12) hour = 0;
+        now = DateTime(now.year(), now.month(), now.day(), hour, 
+            now.minute(), now.second());
+    }
+    else {
+        uint8_t minute = now.minute() + 2;
+        if(minute > 59) minute = 0;
+        now = DateTime(now.year(), now.month(), now.day(), now.hour(), 
+            minute, now.second());
+    }
+
+    RTC.adjust(now);
+}
+
+void clockSetMode() {
+    showHoursMinutes();
+    delay(1000);
+    clearStrip();
+    while(1) {
+        startMillis = millis();
+        
+        for(uint8_t i = 0; i < 2; i++) {
+            if(digitalRead(BUTTONS[i]) == HIGH) {
+                delay(50);
+                if(digitalRead(BUTTONS[i]) == HIGH) {
+                    advance(BUTTONS[i]);
+                }
+            }
+        }
+
+        if(millis() - startMillis > 3000) {
+            delay(500);
+            return;
+        }
+    }
+}
+
+void checkSetMode() {
+    for(uint8_t i = 0; i < 2; i++) {
+        uint8_t button = BUTTONS[i];
+        if(digitalRead(button) == HIGH) {
+            delay(50);
+            if(digitalRead(button) == HIGH) {
+                clockSetMode();
+            }
+        }
+    }
+}
+ 
+void loop() {
+    now = RTC.now();  
+    //Serial.println("Starting the loop...");
+
+    // here we sync up the time so that each loop happens more-or-less at the
+    // top of each second.
+    if(syncLoop) {
+        uint8_t start = now.second();
+        while(now.second() == start) {
+            now = RTC.now();
+        }
+        syncLoop = false;
+    }
+
+    int value = analogRead(LIGHTSENSOR_PIN);
+    value = map(value, 1024, 0, 256, 100);
+    strip.setBrightness(value);
+    //strip.setBrightness(255);
+    checkSetMode();
+
+    clearStrip();
+
+    showHoursMinutes();
+
+    checkSetMode();
+
     uint8_t seconds = now.second();
 
     seconds = clock.forward(seconds, ROTATE * 5);
