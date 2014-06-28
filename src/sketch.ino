@@ -24,7 +24,7 @@ const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
 // number of LEDs for each hand
-const uint8_t MINUTES_LEDS = 3;
+const uint8_t MINUTES_LEDS = 2;
 const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
@@ -55,7 +55,7 @@ void setup () {
 
     //Serial.println("Before setting clock");
  
-    RTC.adjust(DateTime(__DATE__, __TIME__));
+    //RTC.adjust(DateTime(__DATE__, __TIME__));
     if(!RTC.isrunning()) {
         // following line sets the RTC to the date & time this 
         // sketch was compiled
@@ -157,7 +157,6 @@ void setColor(uint8_t led, uint32_t color, boolean setCurrent) {
 } 
 
 void setColor(uint8_t led, uint32_t color) {
-    clearStrip();
     setColor(led, color, true);
 }
 
@@ -168,7 +167,7 @@ void showHoursMinutes() {
     minutes = clock.forward(minutes, ROTATE * 5);
     uint8_t start = minutes;
 
-    for(uint8_t i = 0; i < MINUTES_LEDS; i++) {
+    for(volatile uint8_t i = 0; i < MINUTES_LEDS; i++) {
         setColor(minutes, MINUTES_COLOR);
         minutes = clock.back(start, i + 1);
     }
@@ -179,7 +178,7 @@ void showHoursMinutes() {
     hours += 5 * percent;
     start = hours;
 
-    for(uint8_t i = 0; i < HOURS_LEDS; i++) { 
+    for(volatile uint8_t i = 0; i < HOURS_LEDS; i++) { 
         setColor(hours, HOURS_COLOR);
         hours = clock.back(start, i + 1); 
     }
@@ -260,15 +259,25 @@ void loop() {
     int value = analogRead(LIGHTSENSOR_PIN);
     value = map(value, 1024, 0, 256, 70);
     strip.setBrightness(value);
+
     clearStrip();
+
     checkSetMode();
+
     showHoursMinutes();
+
     checkSetMode();
+
     uint8_t seconds = now.second();
+
     seconds = clock.forward(seconds, ROTATE * 5);
+
     fadeIn(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
+
     delay(500);
+
     loopCount++;
+
     if(loopCount >= SYNC_MAX) {
         syncLoop = true;
     }
