@@ -9,6 +9,8 @@ const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
 const uint8_t LIGHTSENSOR_PIN = A3;
 const uint8_t ROTATE = 6;
+const uint8_t HOUR_BUTTON = 3;
+const uint8_t MINUTE_BUTTON = 4;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -22,7 +24,7 @@ const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
 // number of LEDs for each hand
-const uint8_t MINUTES_LEDS = 2;
+const uint8_t MINUTES_LEDS = 3;
 const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
@@ -31,14 +33,19 @@ const uint16_t FADE_TIME = 500;
 
 // other variables
 RTC_DS1307 RTC;
+const uint8_t BUTTONS[] = {HOUR_BUTTON, MINUTE_BUTTON};
 boolean syncLoop = true;
 uint32_t loopCount = 0;
 RoundClock clock = RoundClock();
 uint32_t *currentColors = new uint32_t[PIXELS] {0};
+unsigned long startMillis = 0;
+DateTime now;
  
 void setup () {
     // set up pins
     pinMode(LIGHTSENSOR_PIN, INPUT);
+    pinMode(HOUR_BUTTON, INPUT_PULLUP);
+    pinMode(MINUTE_BUTTON, INPUT_PULLUP);
 
     Serial.begin(9600);
     Wire.begin();
@@ -150,30 +157,11 @@ void setColor(uint8_t led, uint32_t color, boolean setCurrent) {
 } 
 
 void setColor(uint8_t led, uint32_t color) {
+    clearStrip();
     setColor(led, color, true);
 }
- 
-void loop () {
-    DateTime now = RTC.now();  
-    //Serial.println("Starting the loop...");
 
-    // here we sync up the time so that each loop happens more-or-less at the
-    // top of each second.
-    if(syncLoop) {
-        uint8_t start = now.second();
-        while(now.second() == start) {
-            now = RTC.now();
-        }
-        syncLoop = false;
-    }
-
-    int value = analogRead(LIGHTSENSOR_PIN);
-    value = map(value, 1024, 0, 256, 100);
-    strip.setBrightness(value);
-    //strip.setBrightness(255);
-
-    clearStrip();
-
+void showHoursMinutes() {
     uint8_t minutes = now.minute();
     float percent = minutes / 60.0;
 
@@ -195,15 +183,90 @@ void loop () {
         setColor(hours, HOURS_COLOR);
         hours = clock.back(start, i + 1); 
     }
-    
+
     strip.show();
-    
+}
+
+void advance(uint8_t button) {
+    if(button == HOUR_BUTTON) {
+        uint8_t hour = now.hour() + 1;
+        if(hour > 12) hour = 0;
+        now = DateTime(now.year(), now.month(), now.day(), hour, 
+            now.minute(), now.second());
+    }
+    else {
+        uint8_t minute = now.minute() + 2;
+        if(minute > 59) minute = 0;
+        now = DateTime(now.year(), now.month(), now.day(), now.hour(), 
+            minute, now.second());
+    }
+
+    RTC.adjust(now);
+    showHoursMinutes();
+}
+
+void clockSetMode() {
+    showHoursMinutes();
+    delay(1000);
+    clearStrip();
+    startMillis = millis();
+
+    while(1) {
+        for(uint8_t i = 0; i < 2; i++) {
+            if(digitalRead(BUTTONS[i]) == LOW) {
+                delay(50);
+                if(digitalRead(BUTTONS[i]) == LOW) {
+                    advance(BUTTONS[i]);
+                    startMillis = millis();
+                }
+            }
+        }
+
+        if(millis() - startMillis > 3000) {
+            delay(500);
+            return;
+        }
+    }
+}
+
+void checkSetMode() {
+    return;
+    for(uint8_t i = 0; i < 2; i++) {
+        uint8_t button = BUTTONS[i];
+        if(digitalRead(button) == LOW) {
+            delay(50);
+            if(digitalRead(button) == LOW) {
+                clockSetMode();
+                return;
+            }
+        }
+    }
+}
+ 
+void loop() {
+    now = RTC.now();  
+    //Serial.println("Starting the loop...");
+
+    // here we sync up the time so that each loop happens more-or-less at the
+    // top of each second.
+    if(syncLoop) {
+        uint8_t start = now.second();
+        while(now.second() == start) {
+            now = RTC.now();
+        }
+        syncLoop = false;
+    }
+
+    int value = analogRead(LIGHTSENSOR_PIN);
+    value = map(value, 1024, 0, 256, 70);
+    strip.setBrightness(value);
+    clearStrip();
+    checkSetMode();
+    showHoursMinutes();
+    checkSetMode();
     uint8_t seconds = now.second();
-
     seconds = clock.forward(seconds, ROTATE * 5);
-
     fadeIn(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
-
     delay(500);
     loopCount++;
     if(loopCount >= SYNC_MAX) {
