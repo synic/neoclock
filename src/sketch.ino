@@ -19,7 +19,7 @@ const uint16_t FADE_PAUSE = 500;
 
 // colors
 const uint32_t OFF_COLOR = strip.Color(2, 0, 2);
-const uint32_t FIVE_COLOR = strip.Color(12, 0, 12);
+const uint32_t FIVE_COLOR = strip.Color(17, 0, 17);
 const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
 
@@ -257,7 +257,7 @@ void loop() {
     }
 
     int value = analogRead(LIGHTSENSOR_PIN);
-    value = map(value, 1024, 0, 256, 70);
+    value = map(value, 1024, 0, 256, 50);
     strip.setBrightness(value);
 
     clearStrip();
