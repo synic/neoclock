@@ -22,6 +22,7 @@ const uint32_t OFF_COLOR = strip.Color(2, 0, 2);
 const uint32_t FIVE_COLOR = strip.Color(17, 0, 17);
 const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
+const uint32_t NOON_COLOR = strip.Color(14, 0, 20);
 
 // number of LEDs for each hand
 const uint8_t MINUTES_LEDS = 2;
@@ -83,6 +84,8 @@ void clearStrip() {
         strip.setPixelColor(i, color);
     }
 
+    strip.setPixelColor(0, NOON_COLOR);
+    currentColors[0] = NOON_COLOR;
 }
 
 long mapRange(double x, double in_min, double in_max, double out_min,
@@ -173,7 +176,7 @@ void showHoursMinutes() {
     uint8_t hours = (now.hour() % 12) * 5;
     hours = clock.forward(hours, ROTATE * 5);
 
-    hours += (uint8_t)(5.0 * percent)
+    hours += (uint8_t)(5.0 * percent);
     start = hours;
 
     for(volatile uint8_t i = 0; i < HOURS_LEDS; i++) { 
