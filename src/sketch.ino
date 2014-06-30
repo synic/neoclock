@@ -63,8 +63,6 @@ void setup () {
         RTC.adjust(DateTime(__DATE__, __TIME__));
     }
 
-    //Serial.println(RTC.isrunning());
-
     for(uint8_t i = 0; i < PIXELS; i++) {
         clock.add(i);
     }
@@ -175,7 +173,7 @@ void showHoursMinutes() {
     uint8_t hours = (now.hour() % 12) * 5;
     hours = clock.forward(hours, ROTATE * 5);
 
-    hours += 5 * percent;
+    hours += (uint8_t)(5.0 * percent)
     start = hours;
 
     for(volatile uint8_t i = 0; i < HOURS_LEDS; i++) { 
@@ -244,7 +242,6 @@ void checkSetMode() {
  
 void loop() {
     now = RTC.now();  
-    //Serial.println("Starting the loop...");
 
     // here we sync up the time so that each loop happens more-or-less at the
     // top of each second.
@@ -256,6 +253,7 @@ void loop() {
         syncLoop = false;
     }
 
+    // set brightness based on current light input
     int value = analogRead(LIGHTSENSOR_PIN);
     value = map(value, 1024, 0, 256, 50);
     strip.setBrightness(value);
