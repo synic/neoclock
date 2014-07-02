@@ -22,7 +22,7 @@ const uint32_t OFF_COLOR = strip.Color(2, 0, 2);
 const uint32_t FIVE_COLOR = strip.Color(17, 0, 17);
 const uint32_t MINUTES_COLOR = strip.Color(0, 53, 153);  
 const uint32_t HOURS_COLOR = strip.Color(51, 102, 0);
-const uint32_t NOON_COLOR = strip.Color(14, 0, 20);
+const uint32_t NOON_COLOR = strip.Color(70, 0, 70);
 
 // number of LEDs for each hand
 const uint8_t MINUTES_LEDS = 2;
@@ -73,19 +73,22 @@ void setup () {
 
 void clearStrip() {
     for(uint8_t i = 0; i < PIXELS; i++) {
+        uint8_t pixel = clock.forward(i, ROTATE * 5);
         uint32_t color = OFF_COLOR;
 
         if(i % 5 == 0) {
             color = FIVE_COLOR;
         }
 
-        currentColors[i] = color;
+        currentColors[pixel] = color;
 
-        strip.setPixelColor(i, color);
+        strip.setPixelColor(pixel, color);
     }
 
-    strip.setPixelColor(0, NOON_COLOR);
-    currentColors[0] = NOON_COLOR;
+    uint8_t noon = clock.forward(0, ROTATE * 5);
+
+    strip.setPixelColor(noon, NOON_COLOR);
+    currentColors[noon] = NOON_COLOR;
 }
 
 long mapRange(double x, double in_min, double in_max, double out_min,
