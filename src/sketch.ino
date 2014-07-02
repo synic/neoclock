@@ -233,7 +233,6 @@ void clockSetMode() {
 }
 
 void checkSetMode() {
-    return;
     for(uint8_t i = 0; i < 2; i++) {
         uint8_t button = BUTTONS[i];
         if(digitalRead(button) == LOW) {
