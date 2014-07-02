@@ -9,8 +9,8 @@ const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
 const uint8_t LIGHTSENSOR_PIN = A3;
 const uint8_t ROTATE = 6;
-const uint8_t HOUR_BUTTON = 3;
-const uint8_t MINUTE_BUTTON = 4;
+const uint8_t HOUR_BUTTON = 4;
+const uint8_t MINUTE_BUTTON = 3;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -193,19 +193,22 @@ void showHoursMinutes() {
 void advance(uint8_t button) {
     if(button == HOUR_BUTTON) {
         uint8_t hour = now.hour() + 1;
-        if(hour > 12) hour = 0;
+        if(hour >= 12) hour = 0;
         now = DateTime(now.year(), now.month(), now.day(), hour, 
             now.minute(), now.second());
     }
     else {
-        uint8_t minute = now.minute() + 2;
+        uint8_t minute = now.minute() + 1;
         if(minute > 59) minute = 0;
         now = DateTime(now.year(), now.month(), now.day(), now.hour(), 
             minute, now.second());
     }
 
     RTC.adjust(now);
+    clearStrip();
+    strip.show();
     showHoursMinutes();
+    delay(100);
 }
 
 void clockSetMode() {
