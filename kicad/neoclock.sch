@@ -46,8 +46,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Wire Wire Line
-	1550 3350 1550 3650
 Connection ~ 1550 3450
 Connection ~ 1550 3550
 $Comp
@@ -61,7 +59,6 @@ F 3 "" H 1550 3650 60  0000 C CNN
 	1    1550 3650
 	1    0    0    -1  
 $EndComp
-Connection ~ 1550 3350
 Wire Wire Line
 	1550 1250 1550 1550
 Connection ~ 1550 1550
@@ -346,7 +343,7 @@ U 1 1 53435901
 P 3750 2700
 F 0 "R2" V 3830 2700 40  0000 C CNN
 F 1 "10k" V 3757 2701 40  0000 C CNN
-F 2 "Resistors_SMD:Resistor_SMD0805_HandSoldering" V 3680 2700 30  0001 C CNN
+F 2 "Resistors_SMD:Resistor_SMD0805_ReflowWave" V 3680 2700 30  0001 C CNN
 F 3 "" H 3750 2700 30  0000 C CNN
 	1    3750 2700
 	0    1    1    0   
@@ -372,7 +369,7 @@ U 1 1 5343F9D2
 P 2250 850
 F 0 "R1" V 2330 850 40  0000 C CNN
 F 1 "330" V 2257 851 40  0000 C CNN
-F 2 "Resistors_SMD:Resistor_SMD0805_HandSoldering" V 2180 850 30  0001 C CNN
+F 2 "Resistors_SMD:Resistor_SMD0805_ReflowWave" V 2180 850 30  0001 C CNN
 F 3 "" H 2250 850 30  0000 C CNN
 	1    2250 850 
 	0    1    1    0   
@@ -430,32 +427,19 @@ $EndComp
 Wire Wire Line
 	3700 850  3700 1150
 $Comp
-L CP1 C3
-U 1 1 5343FADD
-P 4250 950
-F 0 "C3" H 4300 1050 50  0000 L CNN
-F 1 "100uF" H 4300 850 50  0000 L CNN
-F 2 "Capacitors_SMD:c_elec_5x5.3" H 4250 950 60  0001 C CNN
-F 3 "" H 4250 950 60  0000 C CNN
-	1    4250 950 
-	1    0    0    -1  
-$EndComp
-$Comp
 L CP1 C4
 U 1 1 5343FAEF
 P 4600 950
 F 0 "C4" H 4650 1050 50  0000 L CNN
 F 1 "10uF" H 4650 850 50  0000 L CNN
-F 2 "Capacitors_SMD:c_elec_4x5.3" H 4600 950 60  0001 C CNN
+F 2 "Capacitors_Tantalum_SMD:TantalC_SizeA_EIA-3216_Reflow" H 4600 950 60  0001 C CNN
 F 3 "" H 4600 950 60  0000 C CNN
 	1    4600 950 
 	1    0    0    -1  
 $EndComp
-Connection ~ 4250 750 
 Wire Wire Line
 	3700 1150 4950 1150
 Connection ~ 3700 950 
-Connection ~ 4250 1150
 $Comp
 L GND #PWR016
 U 1 1 5343FBB9
@@ -624,7 +608,7 @@ U 1 1 53440FF1
 P 4950 2550
 F 0 "R3" V 5030 2550 40  0000 C CNN
 F 1 "10k" V 4957 2551 40  0000 C CNN
-F 2 "Resistors_SMD:Resistor_SMD0805_HandSoldering" V 4880 2550 30  0001 C CNN
+F 2 "Resistors_SMD:Resistor_SMD0805_ReflowWave" V 4880 2550 30  0001 C CNN
 F 3 "" H 4950 2550 30  0000 C CNN
 	1    4950 2550
 	0    1    1    0   
@@ -794,4 +778,56 @@ F 3 "" H 2450 2350 60  0000 C CNN
 $EndComp
 Wire Wire Line
 	4200 750  4950 750 
+Wire Wire Line
+	1550 3450 1550 3650
+$Comp
+L VCC #PWR028
+U 1 1 53C41ECF
+P 6600 1600
+F 0 "#PWR028" H 6600 1700 30  0001 C CNN
+F 1 "VCC" H 6600 1700 30  0000 C CNN
+F 2 "" H 6600 1600 60  0000 C CNN
+F 3 "" H 6600 1600 60  0000 C CNN
+	1    6600 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R4
+U 1 1 53C41EF9
+P 6150 1900
+F 0 "R4" V 6230 1900 40  0000 C CNN
+F 1 "4.7k" V 6157 1901 40  0000 C CNN
+F 2 "Resistors_SMD:Resistor_SMD0805_ReflowWave" V 6080 1900 30  0001 C CNN
+F 3 "" H 6150 1900 30  0000 C CNN
+	1    6150 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R5
+U 1 1 53C41F57
+P 6450 1900
+F 0 "R5" V 6530 1900 40  0000 C CNN
+F 1 "4.7k" V 6457 1901 40  0000 C CNN
+F 2 "Resistors_SMD:Resistor_SMD0805_ReflowWave" V 6380 1900 30  0001 C CNN
+F 3 "" H 6450 1900 30  0000 C CNN
+	1    6450 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6150 1650 6600 1650
+Connection ~ 6450 1650
+Connection ~ 7250 1950
+Wire Wire Line
+	7250 2250 7250 2350
+Wire Wire Line
+	7250 2350 6150 2350
+Wire Wire Line
+	6150 2350 6150 2150
+Connection ~ 7250 2250
+Wire Wire Line
+	7250 1950 7250 2150
+Wire Wire Line
+	7250 2150 6450 2150
+Wire Wire Line
+	6600 1650 6600 1600
 $EndSCHEMATC

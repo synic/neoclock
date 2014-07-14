@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (2014-07-11 BZR 4989)-product   date = Sun 13 Jul 2014 01:22:42 PM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-07-11 BZR 4989)-product   date = Mon 14 Jul 2014 12:13:18 PM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -22,17 +22,10 @@ IdModule  = Capacitors_SMD:c_0805;
 EndCmp
 
 BeginCmp
-TimeStamp = /5343FADD;
-Reference = C3;
-ValeurCmp = 100uF;
-IdModule  = Capacitors_SMD:c_elec_5x5.3;
-EndCmp
-
-BeginCmp
 TimeStamp = /5343FAEF;
 Reference = C4;
 ValeurCmp = 10uF;
-IdModule  = Capacitors_SMD:c_elec_4x5.3;
+IdModule  = Capacitors_Tantalum_SMD:TantalC_SizeA_EIA-3216_Reflow;
 EndCmp
 
 BeginCmp
@@ -109,21 +102,35 @@ BeginCmp
 TimeStamp = /5343F9D2;
 Reference = R1;
 ValeurCmp = 330;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53435901;
 Reference = R2;
 ValeurCmp = 10k;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53440FF1;
 Reference = R3;
 ValeurCmp = 10k;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
+EndCmp
+
+BeginCmp
+TimeStamp = /53C41EF9;
+Reference = R4;
+ValeurCmp = 4.7k;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
+EndCmp
+
+BeginCmp
+TimeStamp = /53C41F57;
+Reference = R5;
+ValeurCmp = 4.7k;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
