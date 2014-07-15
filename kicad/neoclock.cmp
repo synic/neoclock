@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (2014-07-11 BZR 4989)-product   date = Mon 14 Jul 2014 12:13:18 PM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-07-14 BZR 4995)-product   date = Tue 15 Jul 2014 09:38:21 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -17,6 +17,13 @@ EndCmp
 BeginCmp
 TimeStamp = /534352CE;
 Reference = C2;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /53C55422;
+Reference = C3;
 ValeurCmp = 100nF;
 IdModule  = Capacitors_SMD:c_0805;
 EndCmp
@@ -89,6 +96,13 @@ TimeStamp = /5343FD28;
 Reference = P1;
 ValeurCmp = ICSP;
 IdModule  = Pin_Headers:Pin_Header_Straight_2x03;
+EndCmp
+
+BeginCmp
+TimeStamp = /53C54B11;
+Reference = P2;
+ValeurCmp = FTDI;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x06;
 EndCmp
 
 BeginCmp
