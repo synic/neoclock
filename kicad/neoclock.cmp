@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (2014-06-03 BZR 4917)-product   date = Thu 05 Jun 2014 02:20:12 PM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-07-17 BZR 5006)-product   date = Mon 21 Jul 2014 09:36:35 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -32,7 +32,7 @@ BeginCmp
 TimeStamp = /5343FAEF;
 Reference = C4;
 ValeurCmp = 10uF;
-IdModule  = Capacitors_SMD:c_elec_3x5.3;
+IdModule  = Capacitors_SMD:c_elec_4x4.5;
 EndCmp
 
 BeginCmp
@@ -71,6 +71,13 @@ IdModule  = LEDs:LED-0805;
 EndCmp
 
 BeginCmp
+TimeStamp = /53AD8508;
+Reference = F1;
+ValeurCmp = FUSE;
+IdModule  = synic:1206_polyfuse;
+EndCmp
+
+BeginCmp
 TimeStamp = /53435199;
 Reference = IC1;
 ValeurCmp = ATMEGA328P-A;
@@ -95,7 +102,7 @@ BeginCmp
 TimeStamp = /53440FCF;
 Reference = PHOTOR1;
 ValeurCmp = PHOTOR;
-IdModule  = synic:PHOTORESISTOR;
+IdModule  = synicpretty:PHOTORESISTOR;
 EndCmp
 
 BeginCmp
