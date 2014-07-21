@@ -36,7 +36,7 @@ const uint16_t FADE_TIME = 500;
 RTC_DS1307 RTC;
 const uint8_t BUTTONS[] = {HOUR_BUTTON, MINUTE_BUTTON};
 boolean syncLoop = true;
-uint32_t loopCount = 0;
+volatile uint32_t loopCount = 0;
 RoundClock clock = RoundClock();
 uint32_t *currentColors = new uint32_t[PIXELS] {0};
 unsigned long startMillis = 0;
