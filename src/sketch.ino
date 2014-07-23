@@ -1,9 +1,7 @@
 #include <Adafruit_NeoPixel.h> 
 #include <Wire.h>
 #include <math.h>
-
 #include "RTClib.h"
-#include "RoundClock.h"
 
 const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
@@ -13,7 +11,6 @@ const uint8_t HOUR_BUTTON = 4;
 const uint8_t MINUTE_BUTTON = 3;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
-
 const uint16_t SYNC_MAX = 18000; // 5 hours
 const uint16_t FADE_PAUSE = 500;
 
@@ -29,17 +26,15 @@ const uint8_t MINUTES_LEDS = 2;
 const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
-
 const uint16_t FADE_TIME = 500;
 
 // other variables
 RTC_DS1307 RTC;
 const uint8_t BUTTONS[] = {HOUR_BUTTON, MINUTE_BUTTON};
-boolean syncLoop = true;
-volatile uint32_t loopCount = 0;
-RoundClock clock = RoundClock();
-uint32_t *currentColors = new uint32_t[PIXELS] {0};
-unsigned long startMillis = 0;
+boolean sync_loop = true;
+volatile uint32_t loop_count = 0;
+uint32_t *current_colors = new uint32_t[PIXELS] {0};
+unsigned long start_millis = 0;
 DateTime now;
  
 void setup () {
@@ -63,35 +58,41 @@ void setup () {
         Serial.println("Setting clock from compile time.");
         RTC.adjust(DateTime(__DATE__, __TIME__));
     }
-
-    for(uint8_t i = 0; i < PIXELS; i++) {
-        clock.add(i);
-    }
-    
-    clock.done();
 }
 
-void clearStrip() {
+uint8_t forward(uint8_t pos, uint8_t count) {
+    pos += count % PIXELS;
+    if(pos > 60) pos -= 60;
+    return pos;
+}
+
+uint8_t backward(uint8_t pos, uint8_t count) {
+    pos -= count % PIXELS;
+    if(pos < 0) pos += 60;
+    return pos;
+}
+
+void clear_strip() {
     for(uint8_t i = 0; i < PIXELS; i++) {
-        uint8_t pixel = clock.forward(i, ROTATE * 5);
+        uint8_t pixel = forward(i, ROTATE * 5);
         uint32_t color = OFF_COLOR;
 
         if(i % 5 == 0) {
             color = FIVE_COLOR;
         }
 
-        currentColors[pixel] = color;
+        current_colors[pixel] = color;
 
         strip.setPixelColor(pixel, color);
     }
 
-    uint8_t noon = clock.forward(0, ROTATE * 5);
+    uint8_t noon = forward(0, ROTATE * 5);
 
     strip.setPixelColor(noon, NOON_COLOR);
-    currentColors[noon] = NOON_COLOR;
+    current_colors[noon] = NOON_COLOR;
 }
 
-long mapRange(double x, double in_min, double in_max, double out_min,
+long map_range(double x, double in_min, double in_max, double out_min,
     double out_max) {
     return round((x - in_min) * (out_max - out_min) / (in_max - in_min) +
         out_min);
@@ -118,24 +119,24 @@ uint32_t blend(uint32_t color1, uint32_t color2) {
         constrain(g1 + g2, 0, 255), constrain(b1 + b2, 0, 255));
 }
 
-void fadeIn(uint8_t start, uint8_t count, uint8_t _end) {
+void fade_in(uint8_t start, uint8_t count, uint8_t _end) {
     uint8_t add = (float)_end / count;
     uint8_t brightness = add;
     uint16_t _delay = (uint16_t)(FADE_TIME / (double)count - 1); 
 
     uint8_t first = true;
     while(count > 0) {
-        uint8_t led = clock.back(start, count);
+        uint8_t led = backward(start, count);
         uint32_t color = strip.Color(brightness, 0, brightness / 2);
         
-        setColor(led, color, false);
+        set_color(led, color, false);
 
         if(!first) {
-            uint8_t newled = clock.back(led, 2);
-            strip.setPixelColor(newled, currentColors[newled]);
+            uint8_t newled = backward(led, 2);
+            strip.setPixelColor(newled, current_colors[newled]);
             if(count == 1) {
-                newled = clock.back(led, 1);
-                strip.setPixelColor(newled, currentColors[newled]);
+                newled = backward(led, 1);
+                strip.setPixelColor(newled, current_colors[newled]);
             }
         }
         strip.show();
@@ -146,45 +147,45 @@ void fadeIn(uint8_t start, uint8_t count, uint8_t _end) {
     }
 }
 
-void setColor(uint8_t led, uint32_t color, boolean setCurrent) {
+void set_color(uint8_t led, uint32_t color, boolean setCurrent) {
     if(color != OFF_COLOR) {
-        if(currentColors[led] != OFF_COLOR) {
-            color = blend(currentColors[led], color);
+        if(current_colors[led] != OFF_COLOR) {
+            color = blend(current_colors[led], color);
         }
     }
 
     if(setCurrent) {
-        currentColors[led] = color;
+        current_colors[led] = color;
     }
 
     strip.setPixelColor(led, color);
 } 
 
-void setColor(uint8_t led, uint32_t color) {
-    setColor(led, color, true);
+void set_color(uint8_t led, uint32_t color) {
+    set_color(led, color, true);
 }
 
-void showHoursMinutes() {
+void show_hours_minutes() {
     uint8_t minutes = now.minute();
     float percent = minutes / 60.0;
 
-    minutes = clock.forward(minutes, ROTATE * 5);
+    minutes = forward(minutes, ROTATE * 5);
     uint8_t start = minutes;
 
     for(volatile uint8_t i = 0; i < MINUTES_LEDS; i++) {
-        setColor(minutes, MINUTES_COLOR);
-        minutes = clock.back(start, i + 1);
+        set_color(minutes, MINUTES_COLOR);
+        minutes = backward(start, i + 1);
     }
 
     uint8_t hours = (now.hour() % 12) * 5;
-    hours = clock.forward(hours, ROTATE * 5);
+    hours = forward(hours, ROTATE * 5);
 
     hours += (uint8_t)(5.0 * percent);
     start = hours;
 
     for(volatile uint8_t i = 0; i < HOURS_LEDS; i++) { 
-        setColor(hours, HOURS_COLOR);
-        hours = clock.back(start, i + 1); 
+        set_color(hours, HOURS_COLOR);
+        hours = backward(start, i + 1); 
     }
 
     strip.show();
@@ -205,17 +206,17 @@ void advance(uint8_t button) {
     }
 
     RTC.adjust(now);
-    clearStrip();
+    clear_strip();
     strip.show();
-    showHoursMinutes();
+    show_hours_minutes();
     delay(100);
 }
 
-void clockSetMode() {
-    showHoursMinutes();
+void clock_set_mode() {
+    show_hours_minutes();
     delay(1000);
-    clearStrip();
-    startMillis = millis();
+    clear_strip();
+    start_millis = millis();
 
     while(1) {
         for(uint8_t i = 0; i < 2; i++) {
@@ -223,25 +224,25 @@ void clockSetMode() {
                 delay(50);
                 if(digitalRead(BUTTONS[i]) == LOW) {
                     advance(BUTTONS[i]);
-                    startMillis = millis();
+                    start_millis = millis();
                 }
             }
         }
 
-        if(millis() - startMillis > 3000) {
+        if(millis() - start_millis > 3000) {
             delay(500);
             return;
         }
     }
 }
 
-void checkSetMode() {
+void check_set_mode() {
     for(uint8_t i = 0; i < 2; i++) {
         uint8_t button = BUTTONS[i];
         if(digitalRead(button) == LOW) {
             delay(50);
             if(digitalRead(button) == LOW) {
-                clockSetMode();
+                clock_set_mode();
                 return;
             }
         }
@@ -253,12 +254,12 @@ void loop() {
 
     // here we sync up the time so that each loop happens more-or-less at the
     // top of each second.
-    if(syncLoop) {
+    if(sync_loop) {
         uint8_t start = now.second();
         while(now.second() == start) {
             now = RTC.now();
         }
-        syncLoop = false;
+        sync_loop = false;
     }
 
     // set brightness based on current light input
@@ -266,25 +267,25 @@ void loop() {
     value = map(value, 1024, 0, 256, 50);
     strip.setBrightness(value);
 
-    clearStrip();
+    clear_strip();
 
-    checkSetMode();
+    check_set_mode();
 
-    showHoursMinutes();
+    show_hours_minutes();
 
-    checkSetMode();
+    check_set_mode();
 
     uint8_t seconds = now.second();
 
-    seconds = clock.forward(seconds, ROTATE * 5);
+    seconds = forward(seconds, ROTATE * 5);
 
-    fadeIn(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
+    fade_in(seconds, SECONDS_LEDS, MAX_BRIGHTNESS);
 
     delay(500);
 
-    loopCount++;
+    loop_count++;
 
-    if(loopCount >= SYNC_MAX) {
-        syncLoop = true;
+    if(loop_count >= SYNC_MAX) {
+        sync_loop = true;
     }
 }
