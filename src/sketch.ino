@@ -62,11 +62,12 @@ void setup () {
 
 uint8_t forward(uint8_t pos, uint8_t count) {
     pos += count % PIXELS;
-    if(pos > 60) pos -= 60;
+    if(pos > 59) pos -= 60;
     return pos;
 }
 
-uint8_t backward(uint8_t pos, uint8_t count) {
+uint8_t backward(uint8_t pos_, uint8_t count) {
+    int8_t pos = pos_; 
     pos -= count % PIXELS;
     if(pos < 0) pos += 60;
     return pos;
