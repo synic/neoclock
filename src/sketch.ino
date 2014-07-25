@@ -11,7 +11,7 @@ const uint8_t HOUR_BUTTON = 4;
 const uint8_t MINUTE_BUTTON = 3;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
     NEO_PIN, NEO_GRB + NEO_KHZ800);
-const uint16_t SYNC_MAX = 18000; // 5 hours
+const uint16_t SYNC_MAX = 3600; // one hour
 const uint16_t FADE_PAUSE = 500;
 
 // colors
@@ -261,10 +261,11 @@ void loop() {
             now = RTC.now();
         }
         sync_loop = false;
+        loop_count = 0;
     }
 
     // set brightness based on current light input
-    int value = analogRead(LIGHTSENSOR_PIN);
+    uint16_t value = analogRead(LIGHTSENSOR_PIN);
     value = map(value, 1024, 0, 256, 50);
     strip.setBrightness(value);
 
