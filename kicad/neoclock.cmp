@@ -1,10 +1,10 @@
-Cmp-Mod V01 Created by Cvpcb (2014-07-17 BZR 5006)-product   date = Mon 21 Jul 2014 09:36:35 AM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-07-17 BZR 5006)-product   date = Sat 26 Jul 2014 09:42:54 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
 Reference = BT1;
 ValeurCmp = BATTERY;
-IdModule  = synic:BK-755_12mm_coincell;
+IdModule  = synicpretty:BK-755_12mm_coincell;
 EndCmp
 
 BeginCmp
@@ -57,6 +57,13 @@ IdModule  = Capacitors_SMD:c_0805;
 EndCmp
 
 BeginCmp
+TimeStamp = /53D3CBB1;
+Reference = C8;
+ValeurCmp = 100uF;
+IdModule  = Capacitors_SMD:c_elec_5x5.3;
+EndCmp
+
+BeginCmp
 TimeStamp = /5343FA98;
 Reference = CON1;
 ValeurCmp = 2.1mm 5V;
@@ -64,8 +71,15 @@ IdModule  = synic:BARREL_JACK_SMD;
 EndCmp
 
 BeginCmp
-TimeStamp = /5343F9E6;
+TimeStamp = /53D3DF0A;
 Reference = D1;
+ValeurCmp = ERROR;
+IdModule  = LEDs:LED-0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /53D3DCF2;
+Reference = D2;
 ValeurCmp = PWR;
 IdModule  = LEDs:LED-0805;
 EndCmp
@@ -78,7 +92,7 @@ IdModule  = synic:1206_polyfuse;
 EndCmp
 
 BeginCmp
-TimeStamp = /53435199;
+TimeStamp = /53D3D59E;
 Reference = IC1;
 ValeurCmp = ATMEGA328P-A;
 IdModule  = SMD_Packages:TQFP32;
@@ -99,6 +113,13 @@ IdModule  = Pin_Headers:Pin_Header_Straight_2x03;
 EndCmp
 
 BeginCmp
+TimeStamp = /53D3E5F5;
+Reference = P2;
+ValeurCmp = FTDI;
+IdModule  = Pin_Headers:Pin_Header_Straight_1x06;
+EndCmp
+
+BeginCmp
 TimeStamp = /53440FCF;
 Reference = PHOTOR1;
 ValeurCmp = PHOTOR;
@@ -106,38 +127,45 @@ IdModule  = synicpretty:PHOTORESISTOR;
 EndCmp
 
 BeginCmp
-TimeStamp = /5343F9D2;
+TimeStamp = /53D3DBF4;
 Reference = R1;
 ValeurCmp = 330;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53435901;
 Reference = R2;
 ValeurCmp = 10k;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53440FF1;
 Reference = R3;
 ValeurCmp = 10k;
-IdModule  = Resistors_SMD:Resistor_SMD0805_HandSoldering;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
+EndCmp
+
+BeginCmp
+TimeStamp = /53D3DC54;
+Reference = R4;
+ValeurCmp = 330;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
 BeginCmp
 TimeStamp = /53441535;
 Reference = SW1;
 ValeurCmp = HOUR;
-IdModule  = synic:SMD_PUSHBUTTON_MINI;
+IdModule  = synic:KMR2_MICROMINIATURE_BUTTON;
 EndCmp
 
 BeginCmp
 TimeStamp = /53441547;
 Reference = SW2;
 ValeurCmp = MINUTE;
-IdModule  = synic:SMD_PUSHBUTTON_MINI;
+IdModule  = synic:KMR2_MICROMINIATURE_BUTTON;
 EndCmp
 
 BeginCmp
