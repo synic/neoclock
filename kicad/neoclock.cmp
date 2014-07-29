@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (2014-07-17 BZR 5006)-product   date = Sat 26 Jul 2014 09:42:54 AM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-07-25 BZR 5027)-product   date = Tue 29 Jul 2014 03:13:36 PM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -32,7 +32,7 @@ BeginCmp
 TimeStamp = /5343FAEF;
 Reference = C4;
 ValeurCmp = 10uF;
-IdModule  = Capacitors_SMD:c_elec_4x4.5;
+IdModule  = Capacitors_Tantalum_SMD:TantalC_SizeA_EIA-3216_Wave;
 EndCmp
 
 BeginCmp
@@ -67,7 +67,7 @@ BeginCmp
 TimeStamp = /5343FA98;
 Reference = CON1;
 ValeurCmp = 2.1mm 5V;
-IdModule  = synic:BARREL_JACK_SMD;
+IdModule  = synicpretty:BARREL_JACK_SMD;
 EndCmp
 
 BeginCmp
@@ -123,20 +123,13 @@ BeginCmp
 TimeStamp = /53440FCF;
 Reference = PHOTOR1;
 ValeurCmp = PHOTOR;
-IdModule  = synicpretty:PHOTORESISTOR;
+IdModule  = synic:jst-2-pth-ra;
 EndCmp
 
 BeginCmp
 TimeStamp = /53D3DBF4;
 Reference = R1;
 ValeurCmp = 330;
-IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
-EndCmp
-
-BeginCmp
-TimeStamp = /53435901;
-Reference = R2;
-ValeurCmp = 10k;
 IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
