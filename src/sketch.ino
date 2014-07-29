@@ -2,6 +2,7 @@
 #include <Wire.h>
 #include <math.h>
 #include "RTClib.h"
+#include <avr/wdt.h>
 
 const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
@@ -266,7 +267,7 @@ void loop() {
 
     // set brightness based on current light input
     uint16_t value = analogRead(LIGHTSENSOR_PIN);
-    value = map(value, 1024, 0, 256, 50);
+    value = map(value, 1024, 0, 256, 100);
     strip.setBrightness(value);
 
     clear_strip();
