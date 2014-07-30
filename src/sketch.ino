@@ -6,6 +6,7 @@
 
 const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
+const uint8_t PWR_PIN = 9;
 const uint8_t LIGHTSENSOR_PIN = A3;
 const uint8_t ROTATE = 6;
 const uint8_t HOUR_BUTTON = 4;

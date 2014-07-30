@@ -1,4 +1,4 @@
-Cmp-Mod V01 Created by Cvpcb (2014-07-25 BZR 5027)-product   date = Tue 29 Jul 2014 03:13:36 PM MDT
+Cmp-Mod V01 Created by Cvpcb (2014-07-30 BZR 5036)-product   date = Wed 30 Jul 2014 09:27:10 AM MDT
 
 BeginCmp
 TimeStamp = /534356E2;
@@ -64,6 +64,13 @@ IdModule  = Capacitors_SMD:c_elec_5x5.3;
 EndCmp
 
 BeginCmp
+TimeStamp = /53D91643;
+Reference = C9;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:c_0805;
+EndCmp
+
+BeginCmp
 TimeStamp = /5343FA98;
 Reference = CON1;
 ValeurCmp = 2.1mm 5V;
@@ -113,7 +120,7 @@ IdModule  = Pin_Headers:Pin_Header_Straight_2x03;
 EndCmp
 
 BeginCmp
-TimeStamp = /53D3E5F5;
+TimeStamp = /53D91495;
 Reference = P2;
 ValeurCmp = FTDI;
 IdModule  = Pin_Headers:Pin_Header_Straight_1x06;
@@ -130,6 +137,13 @@ BeginCmp
 TimeStamp = /53D3DBF4;
 Reference = R1;
 ValeurCmp = 330;
+IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
+EndCmp
+
+BeginCmp
+TimeStamp = /53D91853;
+Reference = R2;
+ValeurCmp = 10k;
 IdModule  = Resistors_SMD:Resistor_SMD0805_ReflowWave;
 EndCmp
 
