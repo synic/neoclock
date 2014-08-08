@@ -6,8 +6,10 @@
 
 const uint8_t PIXELS = 60;
 const uint8_t NEO_PIN = 6;
-const uint8_t PWR_PIN = 9;
+const uint8_t PWR_PIN = 5;
+const bool POWER_PWR_PIN = true;
 const uint8_t LIGHTSENSOR_PIN = A3;
+const bool USE_LIGHTSENSOR = false;
 const uint8_t ROTATE = 6;
 const uint8_t HOUR_BUTTON = 4;
 const uint8_t MINUTE_BUTTON = 3;
@@ -41,11 +43,21 @@ DateTime now;
  
 void setup () {
     // set up pins
-    pinMode(LIGHTSENSOR_PIN, INPUT);
     pinMode(HOUR_BUTTON, INPUT_PULLUP);
     pinMode(MINUTE_BUTTON, INPUT_PULLUP);
-
     Serial.begin(9600);
+    Serial.println("Started...");
+
+    if(POWER_PWR_PIN) {
+        Serial.println("Turning on the power LED...");
+        pinMode(PWR_PIN, OUTPUT);
+        digitalWrite(PWR_PIN, HIGH);
+    }
+
+    if(USE_LIGHTSENSOR) {
+        pinMode(LIGHTSENSOR_PIN, INPUT);
+    }
+
     Wire.begin();
     RTC.begin();
     strip.begin();
@@ -221,6 +233,8 @@ void clock_set_mode() {
     clear_strip();
     start_millis = millis();
 
+    Serial.println("Clock set mode entered");
+
     while(1) {
         for(uint8_t i = 0; i < 2; i++) {
             if(digitalRead(BUTTONS[i]) == LOW) {
@@ -240,9 +254,14 @@ void clock_set_mode() {
 }
 
 void check_set_mode() {
+    Serial.print("Starting button check: ");
     for(uint8_t i = 0; i < 2; i++) {
         uint8_t button = BUTTONS[i];
+        uint8_t check = digitalRead(button);
+        Serial.print(check);
+
         if(digitalRead(button) == LOW) {
+            Serial.println("button pressed");
             delay(50);
             if(digitalRead(button) == LOW) {
                 clock_set_mode();
@@ -250,6 +269,8 @@ void check_set_mode() {
             }
         }
     }
+
+    Serial.println("");
 }
  
 void loop() {
@@ -266,10 +287,12 @@ void loop() {
         loop_count = 0;
     }
 
-    // set brightness based on current light input
-    uint16_t value = analogRead(LIGHTSENSOR_PIN);
-    value = map(value, 1024, 0, 256, 100);
-    strip.setBrightness(value);
+    if(USE_LIGHTSENSOR) {
+        // set brightness based on current light input
+        uint16_t value = analogRead(LIGHTSENSOR_PIN);
+        value = map(value, 1024, 0, 256, 100);
+        strip.setBrightness(value);
+    }
 
     clear_strip();
 
