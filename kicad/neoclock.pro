@@ -1,4 +1,4 @@
-update=Mon 22 Sep 2014 07:30:17 AM MDT
+update=Mon 22 Sep 2014 12:35:10 PM MDT
 version=1
 last_client=kicad
 [general]
@@ -84,3 +84,4 @@ LibName30=valves
 LibName31=/home/synic/Projects/kicad/libraries/schematic/ds1307timer
 LibName32=/home/synic/Projects/kicad/libraries/schematic/open-project
 LibName33=synic
+LibName34=Tag-Connect
