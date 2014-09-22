@@ -1,6 +1,6 @@
-update=Tue 08 Apr 2014 09:35:07 PM MDT
+update=Mon 22 Sep 2014 07:30:17 AM MDT
 version=1
-last_client=eeschema
+last_client=kicad
 [general]
 version=1
 RootSch=
@@ -49,15 +49,7 @@ LibName15=pga_sockets
 LibName16=valves
 [eeschema]
 version=1
-PageLayoutDescrFile=
-SubpartIdSeparator=0
-SubpartFirstId=65
 LibDir=/home/synic/Projects/kicad/libraries/schematic
-NetFmtName=
-RptD_X=0
-RptD_Y=100
-RptLab=1
-LabSize=60
 [eeschema/libraries]
 LibName1=power
 LibName2=device
@@ -91,3 +83,4 @@ LibName29=contrib
 LibName30=valves
 LibName31=/home/synic/Projects/kicad/libraries/schematic/ds1307timer
 LibName32=/home/synic/Projects/kicad/libraries/schematic/open-project
+LibName33=synic

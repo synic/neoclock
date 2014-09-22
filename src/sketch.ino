@@ -10,7 +10,7 @@ const uint8_t PWR_PIN = 5;
 const bool POWER_PWR_PIN = true;
 const uint8_t LIGHTSENSOR_PIN = A3;
 const bool USE_LIGHTSENSOR = false;
-const uint8_t ROTATE = 6;
+const uint8_t ROTATE = 0;
 const uint8_t HOUR_BUTTON = 4;
 const uint8_t MINUTE_BUTTON = 3;
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, 
@@ -31,6 +31,7 @@ const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
 const uint16_t FADE_TIME = 500;
+const uint8_t brightness = 200;
 
 // other variables
 RTC_DS1307 RTC;
@@ -61,6 +62,7 @@ void setup () {
     Wire.begin();
     RTC.begin();
     strip.begin();
+    strip.setBrightness(brightness);
     strip.show();
 
     //Serial.println("Before setting clock");
@@ -254,11 +256,9 @@ void clock_set_mode() {
 }
 
 void check_set_mode() {
-    Serial.print("Starting button check: ");
     for(uint8_t i = 0; i < 2; i++) {
         uint8_t button = BUTTONS[i];
         uint8_t check = digitalRead(button);
-        Serial.print(check);
 
         if(digitalRead(button) == LOW) {
             Serial.println("button pressed");
@@ -270,11 +270,65 @@ void check_set_mode() {
         }
     }
 
-    Serial.println("");
+}
+
+void theater_chase_rainbow(uint8_t wait) {
+  for (int j=0; j < 256; j++) {     
+    for (int q=0; q < 3; q++) {
+        for (int i=0; i < strip.numPixels(); i=i+3) {
+          strip.setPixelColor(i+q, wheel( (i+j) % 255));    
+        }
+        strip.show();
+       
+        delay(wait);
+       
+        for (int i=0; i < strip.numPixels(); i=i+3) {
+          strip.setPixelColor(i+q, 0);        
+        }
+    }
+  }
+}
+
+void rainbow(uint8_t wait) {
+    uint16_t i, j;
+
+    strip.setBrightness(70);
+
+
+    for(j = 0; j < 256; j++) {
+        for(i = 0; i < strip.numPixels(); i++) {
+            strip.setPixelColor(i, wheel((i+j) & 255));
+        }
+        strip.show();
+        delay(wait);
+    }
+
+    strip.setBrightness(brightness);
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t wheel(byte wheelpos) {
+  if(wheelpos < 85) {
+   return strip.Color(wheelpos * 3, 255 - wheelpos * 3, 0);
+  } else if(wheelpos < 170) {
+   wheelpos -= 85;
+   return strip.Color(255 - wheelpos * 3, 0, wheelpos * 3);
+  } else {
+   wheelpos -= 170;
+   return strip.Color(0, wheelpos * 3, 255 - wheelpos * 3);
+  }
 }
  
 void loop() {
     now = RTC.now();  
+
+    Serial.print("Time is now: ");
+    Serial.print(now.hour());
+    Serial.print(":");
+    Serial.print(now.minute());
+    Serial.print(":");
+    Serial.println(now.second());
 
     // here we sync up the time so that each loop happens more-or-less at the
     // top of each second.
@@ -303,6 +357,12 @@ void loop() {
     check_set_mode();
 
     uint8_t seconds = now.second();
+
+    if(now.minute() == 0 && seconds == 1) {
+        rainbow(20);
+        sync_loop = true;
+        return;
+    }
 
     seconds = forward(seconds, ROTATE * 5);
 
