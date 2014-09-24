@@ -1,0 +1,185 @@
+Cmp-Mod V01 Created by Cvpcb (2014-09-22 BZR 5144)-product   date = Wed 24 Sep 2014 12:17:38 PM MDT
+
+BeginCmp
+TimeStamp = /54207155;
+Reference = BT1;
+ValeurCmp = 3v;
+IdModule  = synicpretty:BK-755_12mm_coincell;
+EndCmp
+
+BeginCmp
+TimeStamp = /54208897;
+Reference = C1;
+ValeurCmp = 4.7uF;
+IdModule  = Capacitors_SMD:C_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /54208406;
+Reference = C2;
+ValeurCmp = 1uF;
+IdModule  = Capacitors_SMD:C_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /542323A3;
+Reference = C3;
+ValeurCmp = 1uF;
+IdModule  = Capacitors_SMD:C_0805;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420887A;
+Reference = C5;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:C_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /542083CF;
+Reference = C6;
+ValeurCmp = 10nF;
+IdModule  = Capacitors_SMD:C_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420885C;
+Reference = C7;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:C_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /542087D7;
+Reference = C8;
+ValeurCmp = 100nF;
+IdModule  = Capacitors_SMD:C_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420AA5E;
+Reference = C9;
+ValeurCmp = 100uF;
+IdModule  = Capacitors_SMD:c_elec_5x5.3;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420A98D;
+Reference = C10;
+ValeurCmp = 10uF;
+IdModule  = Capacitors_SMD:c_elec_4x4.5;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420A944;
+Reference = CON1;
+ValeurCmp = 1.2mm 5v;
+IdModule  = synicpretty:BARREL_JACK_SMD;
+EndCmp
+
+BeginCmp
+TimeStamp = /542316DE;
+Reference = F1;
+ValeurCmp = FUSE;
+IdModule  = synic:1206_polyfuse;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420A63C;
+Reference = K1;
+ValeurCmp = NEO;
+IdModule  = synic:jst-3-pth-ra;
+EndCmp
+
+BeginCmp
+TimeStamp = /54209975;
+Reference = P1;
+ValeurCmp = TC2030-CTX;
+IdModule  = Tag-Connect:TC2030_SMALL;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420D3A0;
+Reference = P2;
+ValeurCmp = PHOTOR;
+IdModule  = synic:jst-2-pth-ra;
+EndCmp
+
+BeginCmp
+TimeStamp = /54208F05;
+Reference = R1;
+ValeurCmp = 10k;
+IdModule  = Resistors_SMD:R_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /54208F51;
+Reference = R2;
+ValeurCmp = 10k;
+IdModule  = Resistors_SMD:R_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420D0CA;
+Reference = R3;
+ValeurCmp = 10k;
+IdModule  = Resistors_SMD:R_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /54231407;
+Reference = R4;
+ValeurCmp = 10k;
+IdModule  = Resistors_SMD:R_0603;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420D6C8;
+Reference = SW1;
+ValeurCmp = HOUR;
+IdModule  = synic:jst-2-pth-ra;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420D7C1;
+Reference = SW2;
+ValeurCmp = MINUTE;
+IdModule  = synic:jst-2-pth-ra;
+EndCmp
+
+BeginCmp
+TimeStamp = /54231ED9;
+Reference = SW3;
+ValeurCmp = HOUR;
+IdModule  = synic:KMR2_MICROMINIATURE_BUTTON;
+EndCmp
+
+BeginCmp
+TimeStamp = /54231F10;
+Reference = SW4;
+ValeurCmp = MINUTE;
+IdModule  = synic:KMR2_MICROMINIATURE_BUTTON;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420ED70;
+Reference = U1;
+ValeurCmp = stm32f303x;
+IdModule  = lqfp48:LQFP48;
+EndCmp
+
+BeginCmp
+TimeStamp = /54231228;
+Reference = U2;
+ValeurCmp = TLV702xx;
+IdModule  = SMD_Packages:SOT-23-5;
+EndCmp
+
+BeginCmp
+TimeStamp = /5420907D;
+Reference = X1;
+ValeurCmp = 32.768KHz;
+IdModule  = synic:2_SMD_CRYSTAL_3.2x1.5;
+EndCmp
+
+EndListe
