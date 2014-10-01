@@ -9,8 +9,8 @@ const uint8_t HIGH = 25;
 const uint8_t RESET_LEN = 25;
 
 void ws2812_set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
-    uint32_t n = (led * 24);
-    uint8_t i;
+    volatile uint32_t n = (led * 24);
+    volatile uint8_t i;
 
     if(strip.brightness > 0) {
         r = (r * strip.brightness) >> 8;
@@ -33,7 +33,7 @@ void ws2812_set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
 }
 
 void ws2812_set_color_single(uint8_t led, uint32_t c) {
-    uint8_t
+    volatile uint8_t
         r = (uint8_t)(c >> 16),
         g = (uint8_t)(c >> 8),
         b = (uint8_t)(c);
@@ -46,7 +46,7 @@ uint32_t ws2812_color(uint8_t r, uint8_t b, uint8_t g) {
 }
 
 void ws2812_clear(void) {
-    uint16_t i;
+    volatile uint16_t i;
 
     // initialize all the colors as off
     for(i = 0; i < strip.num_leds; i++) {
@@ -69,8 +69,8 @@ uint32_t wheel(char pos) {
 }
 
 void ws2812_show(void) {
-    uint16_t memaddr;
-    uint16_t buffersize;
+    volatile uint16_t memaddr;
+    volatile uint16_t buffersize;
 
     buffersize = (strip.num_leds * 24) + RESET_LEN;
     memaddr = (strip.num_leds * 24);
@@ -92,7 +92,7 @@ void ws2812_show(void) {
 }
 
 void rainbow(uint32_t wait) {
-    uint16_t i, j;
+    volatile uint16_t i, j;
 
     for(j = 0; j < 256 * 5; j++) {
         for(i = 0; i < strip.num_leds; i++) {

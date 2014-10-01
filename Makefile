@@ -5,7 +5,7 @@
 ######################################
 # target
 ######################################
-TARGET = Blank
+TARGET = NeoClock
 
 ######################################
 # building variables
@@ -15,8 +15,7 @@ DEBUG = 1
 # build for debug in ram?
 RAMBUILD = 0
 # optimization
-OPT = -O0
-#OPT = -Os
+OPT = -O0 -g
 
 #######################################
 # paths
@@ -95,10 +94,10 @@ INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/Device/ST/STM32F30x/Include
 INCLUDES += -I$(PERIPHLIBPATH)/STM32F30x_StdPeriph_Driver/inc
 INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/Include
 # compile gcc flags
-CFLAGS = -mthumb -mcpu=cortex-m4 $(DEFS) $(INCLUDES) $(OPT) -Wall
-ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2 -fno-common -fdata-sections -ffunction-sections
-endif
+CFLAGS = -mthumb -mcpu=cortex-m4 $(DEFS) $(INCLUDES) $(OPT) -Wall -fno-common -fdata-sections -ffunction-sections
+# ifeq ($(DEBUG), 1)
+# CFLAGS += -g -gdwarf-2 -fno-common -fdata-sections -ffunction-sections
+# endif
 # Generate dependency information
 CFLAGS += -MD -MP -MF .dep/$(@F).d
 
@@ -110,7 +109,7 @@ LDSCRIPT = linker/STM32F303VC_FLASH.ld
 # libraries
 LIBS = -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 LIBDIR =
-LDFLAGS = -mthumb -mcpu=cortex-m4 -specs=nano.specs -T$(LDSCRIPT) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections
+LDFLAGS = -mthumb -mcpu=cortex-m4 -specs=nano.specs -T$(LDSCRIPT) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections --static -nostartfiles
 
 
 # default action: build all
