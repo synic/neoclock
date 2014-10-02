@@ -4,9 +4,9 @@
 #include "stm32f30x.h"
 
 struct ws2812 {
-    int num_leds;
+    uint8_t num_leds;
     uint8_t brightness;
-    uint8_t dma_buffer[4000];
+    uint8_t dma_buffer[1000];
 };
 
 extern struct ws2812 strip;

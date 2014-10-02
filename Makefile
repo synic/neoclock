@@ -15,7 +15,7 @@ DEBUG = 1
 # build for debug in ram?
 RAMBUILD = 0
 # optimization
-OPT = -O0 -g
+OPT = -O0 
 
 #######################################
 # paths
@@ -96,7 +96,7 @@ INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/Include
 # compile gcc flags
 CFLAGS = -mthumb -mcpu=cortex-m4 $(DEFS) $(INCLUDES) $(OPT) -Wall -fno-common -fdata-sections -ffunction-sections
 # ifeq ($(DEBUG), 1)
-# CFLAGS += -g -gdwarf-2 -fno-common -fdata-sections -ffunction-sections
+CFLAGS += -g -gdwarf-2 -fno-common -fdata-sections -ffunction-sections
 # endif
 # Generate dependency information
 CFLAGS += -MD -MP -MF .dep/$(@F).d
@@ -107,7 +107,7 @@ CFLAGS += -MD -MP -MF .dep/$(@F).d
 # link script
 LDSCRIPT = linker/STM32F303VC_FLASH.ld
 # libraries
-LIBS = -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
+LIBS = -Wl,--start-group -lc -lm -lgcc -lnosys -Wl,--end-group
 LIBDIR =
 LDFLAGS = -mthumb -mcpu=cortex-m4 -specs=nano.specs -T$(LDSCRIPT) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections --static -nostartfiles
 
