@@ -3,10 +3,10 @@
 
 #include "stm32f30x.h"
 
-struct ws2812 {
+struct __attribute__((aligned(4))) ws2812 {
     uint8_t num_leds;
     uint8_t brightness;
-    uint8_t dma_buffer[1000];
+    uint8_t __attribute__((aligned(4))) dma_buffer[1000];
 };
 
 extern struct ws2812 strip;
