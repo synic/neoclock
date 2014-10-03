@@ -280,7 +280,7 @@ void SystemCoreClockUpdate (void) {
 static void SetSysClock(void)
 {
   
-/*    __IO uint32_t StartUpCounter = 0, HSEStatus = 0;*/
+    //__IO uint32_t StartUpCounter = 0, HSEStatus = 0;
     /* SYSCLK, HCLK, PCLK configuration ----------------------------------------*/
 #if defined (PLL_SOURCE_HSI)
     /* At this stage the HSI is already enabled */
