@@ -3,13 +3,7 @@
 __IO uint32_t AsynchPrediv = 0, SynchPrediv = 0;
 
 
-void set_time(void) {
-    RTC_TimeTypeDef RTC_TimeStructure;
-    RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
-    RTC_TimeStructure.RTC_Hours = 0;
-    RTC_TimeStructure.RTC_Minutes = 0;
-    RTC_TimeStructure.RTC_Seconds = 1;
-    
+void set_time(RTC_TimeTypeDef RTC_TimeStructure) {
     if(RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure) != ERROR) {
         RTC_WriteBackupRegister(RTC_BKP_DR0, 0x32F2);
     }
@@ -68,7 +62,12 @@ void setup_rtc(void) {
             printf("RTC Prescaler Config Failed");
         }
 
-        set_time(); 
+        RTC_TimeTypeDef RTC_TimeStructure;
+        RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
+        RTC_TimeStructure.RTC_Hours = 0;
+        RTC_TimeStructure.RTC_Minutes = 0;
+        RTC_TimeStructure.RTC_Seconds = 1;
+        set_time(RTC_TimeStructure); 
     }
     else {
         if(RCC_GetFlagStatus(RCC_FLAG_PORRST) != RESET) {

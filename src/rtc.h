@@ -6,7 +6,7 @@
 
 #define RTC_CLOCK_SOURCE_LSI
 
-void set_time(void);
+void set_time(RTC_TimeTypeDef RTC_TimeStructure);
 void rtc_config(void);
 void setup_rtc(void);
 

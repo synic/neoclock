@@ -1,25 +1,12 @@
-#include <math.h>
-#include <stdint.h>
+#include "main.h"
 
-#include "stm32f30x.h"
-#include "timer.h"
-#include "rtc.h"
-#include "dma.h"
-#include "gpio.h"
-#include "ws2812.h"
-#include "aolib.h"
-
-const uint8_t PIXELS = 60;
-const uint8_t ROTATE = 6;
-const uint16_t SYNC_MAX = 3600; // one hour
-const uint16_t FADE_PAUSE = 500;
 
 // colors
-uint32_t OFF_COLOR = 131074L; // ws2812_color(2, 0, 2);
-uint32_t FIVE_COLOR = 1114129L; // ws2812_color(17, 0, 17); 
-uint32_t MINUTES_COLOR = 13721L; // ws2812_color(0, 53, 153);
-uint32_t HOURS_COLOR = 3368448L; // ws2812_color(51, 102, 0);
-uint32_t NOON_COLOR = 4587590L; // ws2812_color(70, 0, 70);
+const uint32_t OFF_COLOR = 131074L; // ws2812_color(2, 0, 2);
+const uint32_t FIVE_COLOR = 1114129L; // ws2812_color(17, 0, 17); 
+const uint32_t MINUTES_COLOR = 13721L; // ws2812_color(0, 53, 153);
+const uint32_t HOURS_COLOR = 3368448L; // ws2812_color(51, 102, 0);
+const uint32_t NOON_COLOR = 4587590L; // ws2812_color(70, 0, 70);
 
 // number of LEDS for each "hand"
 const uint8_t MINUTES_LEDS = 2;
@@ -27,6 +14,15 @@ const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
 const uint16_t FADE_TIME = 1800;
+const uint16_t HOUR_BUTTON = GPIO_Pin_1;
+const uint16_t MINUTE_BUTTON = GPIO_Pin_2;
+const uint16_t BUTTONS[] = {GPIO_Pin_1, GPIO_Pin_2};
+
+const uint8_t PIXELS = 60;
+const uint8_t ROTATE = 6;
+const uint16_t SYNC_MAX = 3600; // one hour
+const uint16_t FADE_PAUSE = 500;
+
 
 // other variables
 RTC_TimeTypeDef RTC_TimeStructure;
@@ -34,27 +30,12 @@ uint8_t sync_loop = 0;
 uint32_t loop_count = 0;
 uint32_t current_colors[60];
 uint32_t start_millis = 0;
-
-// prototypes
-uint8_t forward(uint8_t pos, uint8_t count);
-uint8_t backward(uint8_t post, uint8_t count);
-void clear_strip(void);
-uint32_t map_range(double x, double in_min, double in_max, double out_min,
-    double out_max);
-uint32_t blend(uint32_t color1, uint32_t color2);
-void fade_in(uint8_t start, uint8_t count, uint8_t end);
-void set_color(uint8_t led, uint32_t color, uint8_t set_current);
-void show_hours_minutes(void);
-void advance(uint8_t button);
-void clock_set_mode(void);
-void check_set_mode(void);
-uint8_t constrain(uint8_t value, uint8_t min, uint8_t max);
+volatile uint64_t counter = 0;
 
 
-
-/*****************************************************************************/
-//                            FUNCTION DEFINITIONS                           // 
-/*****************************************************************************/
+void increment_counter(void) {
+    counter++;
+}
 
 uint8_t constrain(uint8_t value, uint8_t min, uint8_t max) {
     if(value < min) value = min;
@@ -197,15 +178,65 @@ void show_hours_minutes(void) {
 }
 
 void advance(uint8_t button) {
-    // TODO: implement this
+    if(button == HOUR_BUTTON) {
+        uint8_t hour = RTC_TimeStructure.RTC_Hours + 1;
+        if(hour >= 12) hour = 0;
+
+        RTC_TimeStructure.RTC_Hours = hour;
+    }
+    else {
+        uint8_t minute = RTC_TimeStructure.RTC_Minutes + 1;
+        if(minute > 59) minute = 0;
+        RTC_TimeStructure.RTC_Minutes = minute;
+    }
+
+    set_time(RTC_TimeStructure);
+
+    clear_strip();
+    ws2812_show();;
+    show_hours_minutes();
+    delay(200);
 }
 
 void clock_set_mode(void) {
-    // TODO: implement this
+    uint8_t i, button = 0;
+    show_hours_minutes();
+    delay(2000);
+    clear_strip();
+    uint64_t start_millis = counter;
+    while(1) {
+        for(i = 0; i < 2; i++) {
+            button = BUTTONS[i]; 
+            if(!GPIO_ReadInputDataBit(GPIOA, button)) {
+                delay(120);
+                if(!GPIO_ReadInputDataBit(GPIOA, button)) {
+                    advance(BUTTONS[i]);
+                    start_millis = counter;
+                }
+            }
+        }
+
+        if(counter - start_millis > 3000) {
+            delay(1000);
+            return;
+        }
+    }
 }
 
 void check_set_mode(void) {
-    // TODO: implement this
+    uint8_t i;
+    uint16_t button;
+
+    for(i = 0; i < 2; i++) {
+        button = BUTTONS[i];
+        if(!GPIO_ReadInputDataBit(GPIOA, button)) {
+            delay(120);
+            if(!GPIO_ReadInputDataBit(GPIOA, button)) {
+                clock_set_mode();
+                return;
+            }
+        }
+    }
 }
 /*****************************************************************************/
 //                                  MAIN LOOP                                // 
@@ -216,11 +247,16 @@ int main(void) {
     setup_timer();
     setup_dma();
 
+    if(SysTick_Config(SystemCoreClock / 45000)) {
+        while(1) { }
+    }
+
+
     strip.num_leds = 60;
     strip.brightness = 150;
 
     uint8_t current_seconds = 0, start = 0, seconds = 0;
-  
+
     ws2812_clear();
 
     while(1) {
