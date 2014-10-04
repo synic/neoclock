@@ -6,7 +6,7 @@ struct ws2812 strip;
 const uint8_t PERIOD = 59;
 const uint8_t LOW = 17;
 const uint8_t HIGH = 25;
-const uint8_t RESET_LEN = 25;
+const uint8_t RESET_LEN = 50;
 
 void ws2812_set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
     volatile uint32_t n = (led * 24);
@@ -41,8 +41,8 @@ void ws2812_set_color_single(uint8_t led, uint32_t c) {
     ws2812_set_color(led, r, g, b);
 }
 
-uint32_t ws2812_color(uint8_t r, uint8_t b, uint8_t g) {
-    return ((uint32_t)r << 16) | ((uint32_t) g << 8) | b;
+uint32_t ws2812_color(uint8_t r, uint8_t g, uint8_t b) {
+    return ((uint32_t)r << 16) | ((uint32_t)g <<  8) | b;
 }
 
 void ws2812_clear(void) {

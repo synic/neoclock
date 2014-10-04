@@ -1,11 +1,10 @@
 #include "rtc.h"
 
-RTC_TimeTypeDef RTC_TimeStructure;
-RTC_InitTypeDef RTC_InitStructure;
 __IO uint32_t AsynchPrediv = 0, SynchPrediv = 0;
 
 
 void set_time(void) {
+    RTC_TimeTypeDef RTC_TimeStructure;
     RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
     RTC_TimeStructure.RTC_Hours = 0;
     RTC_TimeStructure.RTC_Minutes = 0;
@@ -53,6 +52,7 @@ void rtc_config(void) {
 }
 
 void setup_rtc(void) {
+    RTC_InitTypeDef RTC_InitStructure;
 #if defined (RTC_CLOCK_SOURCE_LSI)   
     RCC_LSICmd(ENABLE);
 #endif  
