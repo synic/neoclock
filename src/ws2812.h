@@ -6,7 +6,7 @@
 struct __attribute__((aligned(4))) ws2812 {
     uint8_t num_leds;
     uint8_t brightness;
-    uint8_t dma_buffer[8000];
+    uint8_t dma_buffer[100];
 };
 
 extern struct ws2812 strip;
