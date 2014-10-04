@@ -26,7 +26,7 @@ const uint8_t MINUTES_LEDS = 2;
 const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
-const uint16_t FADE_TIME = 1600;
+const uint16_t FADE_TIME = 1800;
 
 // other variables
 RTC_TimeTypeDef RTC_TimeStructure;

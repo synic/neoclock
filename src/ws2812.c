@@ -80,10 +80,7 @@ void ws2812_show(void) {
         memaddr++;
     }
 
-
-/*    TIM_SetCompare3(TIM3, 0);*/
-/*    TIM_SetCounter(TIM3, 0);*/
-    DMA_SetCurrDataCounter(DMA1_Channel2, buffersize);
+    DMA_SetCurrDataCounter(DMA1_Channel2, buffersize - 1);
     DMA_Cmd(DMA1_Channel2, ENABLE);
     TIM_Cmd(TIM3, ENABLE);
 
