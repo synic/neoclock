@@ -32,7 +32,7 @@ LIBS:valves
 LIBS:synic
 LIBS:Tag-Connect
 LIBS:neoclock-cache
-EELAYER 24 0
+EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -249,12 +249,12 @@ $EndComp
 $Comp
 L CONN_3 K1
 U 1 1 5420A63C
-P 5150 1950
-F 0 "K1" V 5100 1950 50  0000 C CNN
-F 1 "NEO" V 5200 1950 40  0000 C CNN
-F 2 "synic:jst-3-pth-ra" H 5150 1950 60  0001 C CNN
-F 3 "" H 5150 1950 60  0000 C CNN
-	1    5150 1950
+P 5550 2650
+F 0 "K1" V 5500 2650 50  0000 C CNN
+F 1 "NEO" V 5600 2650 40  0000 C CNN
+F 2 "synic:jst-3-pth-ra" H 5550 2650 60  0001 C CNN
+F 3 "" H 5550 2650 60  0000 C CNN
+	1    5550 2650
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -326,12 +326,12 @@ $EndComp
 $Comp
 L GND #PWR010
 U 1 1 5420B549
-P 4800 1950
-F 0 "#PWR010" H 4800 1950 30  0001 C CNN
-F 1 "GND" H 4800 1880 30  0001 C CNN
-F 2 "" H 4800 1950 60  0000 C CNN
-F 3 "" H 4800 1950 60  0000 C CNN
-	1    4800 1950
+P 5200 2650
+F 0 "#PWR010" H 5200 2650 30  0001 C CNN
+F 1 "GND" H 5200 2580 30  0001 C CNN
+F 2 "" H 5200 2650 60  0000 C CNN
+F 3 "" H 5200 2650 60  0000 C CNN
+	1    5200 2650
 	0    1    1    0   
 $EndComp
 Wire Wire Line
@@ -369,9 +369,6 @@ Wire Wire Line
 Connection ~ 1300 1250
 Connection ~ 1300 1650
 Connection ~ 1100 1650
-Wire Wire Line
-	1350 2500 1350 2750
-Connection ~ 1350 2500
 Connection ~ 1350 2650
 Wire Wire Line
 	1850 2650 1950 2650
@@ -400,8 +397,6 @@ Wire Wire Line
 Wire Wire Line
 	2600 4950 2650 4950
 Wire Wire Line
-	4150 2050 4800 2050
-Wire Wire Line
 	2100 7100 3650 7100
 Connection ~ 2700 7100
 Wire Wire Line
@@ -415,7 +410,7 @@ Connection ~ 4050 7500
 Connection ~ 4650 7100
 Connection ~ 4650 7500
 Wire Wire Line
-	4700 1850 4800 1850
+	5100 2550 5200 2550
 Wire Wire Line
 	2650 6700 2650 6850
 Wire Wire Line
@@ -424,7 +419,7 @@ Connection ~ 2350 6850
 Connection ~ 2650 6300
 Text GLabel 3200 6300 2    60   Output ~ 0
 VCC5V
-Text GLabel 4700 1850 0    60   Input ~ 0
+Text GLabel 5100 2550 0    60   Input ~ 0
 VCC5V
 Wire Wire Line
 	4150 1050 4900 1050
@@ -534,7 +529,6 @@ NoConn ~ 4150 1950
 NoConn ~ 4150 2150
 NoConn ~ 4150 2250
 NoConn ~ 4150 2550
-NoConn ~ 4150 2750
 NoConn ~ 4150 2850
 NoConn ~ 4150 2950
 NoConn ~ 4150 3050
@@ -671,4 +665,22 @@ F 3 "" H 1100 1700 60  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 Connection ~ 1100 1700
+Wire Wire Line
+	1350 2650 1350 2750
+Wire Wire Line
+	1350 2750 1200 2750
+$Comp
+L VCC #PWR?
+U 1 1 543089E2
+P 1200 2750
+F 0 "#PWR?" H 1200 2850 30  0001 C CNN
+F 1 "VCC" H 1200 2850 30  0000 C CNN
+F 2 "" H 1200 2750 60  0000 C CNN
+F 3 "" H 1200 2750 60  0000 C CNN
+	1    1200 2750
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	4150 2750 5200 2750
+NoConn ~ 4150 2050
 $EndSCHEMATC
