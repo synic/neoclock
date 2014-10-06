@@ -13,7 +13,7 @@ const uint8_t MINUTES_LEDS = 2;
 const uint8_t HOURS_LEDS = 1;
 const uint8_t SECONDS_LEDS = 18;
 const uint8_t MAX_BRIGHTNESS = 60;
-const uint16_t FADE_TIME = 1800;
+const uint16_t FADE_TIME = 500;
 const uint16_t HOUR_BUTTON = GPIO_Pin_1;
 const uint16_t MINUTE_BUTTON = GPIO_Pin_2;
 const uint16_t BUTTONS[] = {GPIO_Pin_1, GPIO_Pin_2};
@@ -31,10 +31,14 @@ uint32_t loop_count = 0;
 uint32_t current_colors[60];
 uint32_t start_millis = 0;
 volatile uint64_t counter = 0;
+volatile uint64_t delay_ms = 0;
 
 
-void increment_counter(void) {
+void systick_handler(void) {
     counter++;
+    if(delay_ms > 0) {
+        delay_ms --;
+    }
 }
 
 uint8_t constrain(uint8_t value, uint8_t min, uint8_t max) {
@@ -201,14 +205,14 @@ void advance(uint8_t button) {
 void clock_set_mode(void) {
     uint8_t i, button = 0;
     show_hours_minutes();
-    delay(2000);
+    delay(1000);
     clear_strip();
     uint64_t start_millis = counter;
     while(1) {
         for(i = 0; i < 2; i++) {
             button = BUTTONS[i]; 
             if(!GPIO_ReadInputDataBit(GPIOA, button)) {
-                delay(120);
+                delay(50);
                 if(!GPIO_ReadInputDataBit(GPIOA, button)) {
                     advance(BUTTONS[i]);
                     start_millis = counter;
@@ -230,7 +234,7 @@ void check_set_mode(void) {
     for(i = 0; i < 2; i++) {
         button = BUTTONS[i];
         if(!GPIO_ReadInputDataBit(GPIOA, button)) {
-            delay(120);
+            delay(50);
             if(!GPIO_ReadInputDataBit(GPIOA, button)) {
                 clock_set_mode();
                 return;
@@ -242,18 +246,19 @@ void check_set_mode(void) {
 //                                  MAIN LOOP                                // 
 /*****************************************************************************/
 int main(void) {
+    if(SysTick_Config(SystemCoreClock / 1000)) {
+        while(1) { }
+    }
+
     setup_gpio();
     setup_rtc();
     setup_timer();
     setup_dma();
 
-    if(SysTick_Config(SystemCoreClock / 45000)) {
-        while(1) { }
-    }
-
+    delay(500);
 
     strip.num_leds = 60;
-    strip.brightness = 150;
+    strip.brightness = 0;
 
     uint8_t current_seconds = 0, start = 0, seconds = 0;
 
