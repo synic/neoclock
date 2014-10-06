@@ -33,8 +33,8 @@ void rtc_config(void) {
 
     RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
     
-    SynchPrediv = 0xFF;
     AsynchPrediv = 0x7F;
+    SynchPrediv = 0xFF;
 
 #else
   #error Please select the RTC Clock source inside the main.c file

@@ -40,6 +40,7 @@ extern uint32_t loop_count;
 extern uint32_t current_colors[];
 extern uint32_t start_millis;
 extern volatile uint64_t counter;
+extern volatile uint64_t delay_ms;
 
 // prototypes
 uint8_t forward(uint8_t pos, uint8_t count);
@@ -55,6 +56,6 @@ void advance(uint8_t button);
 void clock_set_mode(void);
 void check_set_mode(void);
 uint8_t constrain(uint8_t value, uint8_t min, uint8_t max);
-void increment_counter(void);
+void systick_handler(void);
 
 #endif

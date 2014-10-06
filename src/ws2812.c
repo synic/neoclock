@@ -80,17 +80,17 @@ void ws2812_show(void) {
         memaddr++;
     }
 
-    TIM_SetCounter(TIM3, PERIOD);
+    TIM_SetCounter(TIM2, PERIOD);
 
-    DMA_SetCurrDataCounter(DMA1_Channel2, buffersize);
-    DMA_Cmd(DMA1_Channel2, ENABLE);
-    TIM_Cmd(TIM3, ENABLE);
+    DMA_SetCurrDataCounter(DMA1_Channel7, buffersize);
+    DMA_Cmd(DMA1_Channel7, ENABLE);
+    TIM_Cmd(TIM2, ENABLE);
 
-    while(!DMA_GetFlagStatus(DMA1_FLAG_TC2));
+    while(!DMA_GetFlagStatus(DMA1_FLAG_TC7));
 
-    DMA_Cmd(DMA1_Channel2, DISABLE);
-    TIM_Cmd(TIM3, DISABLE);
-    DMA_ClearFlag(DMA1_FLAG_TC2);
+    DMA_Cmd(DMA1_Channel7, DISABLE);
+    TIM_Cmd(TIM2, DISABLE);
+    DMA_ClearFlag(DMA1_FLAG_TC7);
 }
 
 void rainbow(uint32_t wait) {
