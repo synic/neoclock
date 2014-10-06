@@ -721,11 +721,8 @@ $EndComp
 Wire Wire Line
 	4150 2050 4700 2050
 Wire Wire Line
-	5500 1950 6100 1950
-Wire Wire Line
 	6100 1850 6100 2200
 Connection ~ 6100 1850
-Connection ~ 6100 1950
 $Comp
 L GND #PWR016
 U 1 1 5431CCFA
@@ -836,7 +833,7 @@ Wire Wire Line
 Wire Wire Line
 	5950 1250 5950 750 
 Wire Wire Line
-	4450 1550 4700 1550
+	4450 1550 5600 1550
 Wire Wire Line
 	4450 1950 4700 1950
 Connection ~ 4550 1950
@@ -865,4 +862,9 @@ $EndComp
 Wire Wire Line
 	1450 6400 1450 7100
 Connection ~ 1450 7100
+Wire Wire Line
+	5500 1950 5600 1950
+Wire Wire Line
+	5600 1950 5600 1550
+Connection ~ 4700 1550
 $EndSCHEMATC
