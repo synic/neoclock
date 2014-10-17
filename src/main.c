@@ -255,14 +255,15 @@ int main(void) {
     setup_timer();
     setup_dma();
 
-    delay(500);
-
     strip.num_leds = 60;
-    strip.brightness = 0;
+    strip.brightness = 40;
 
     uint8_t current_seconds = 0, start = 0, seconds = 0;
 
     ws2812_clear();
+    while(1) {
+        rainbow(0);
+    }
 
     while(1) {
         // get the current time

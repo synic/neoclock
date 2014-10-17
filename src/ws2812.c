@@ -4,8 +4,8 @@
 struct ws2812 strip;
 
 const uint8_t PERIOD = 59;
-const uint8_t LOW = 17;
-const uint8_t HIGH = 25;
+const uint8_t LOW = 16;
+const uint8_t HIGH = 26;
 const uint8_t RESET_LEN = 50;
 
 void ws2812_set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
@@ -88,8 +88,8 @@ void ws2812_show(void) {
 
     while(!DMA_GetFlagStatus(DMA1_FLAG_TC7));
 
-    DMA_Cmd(DMA1_Channel7, DISABLE);
     TIM_Cmd(TIM2, DISABLE);
+    DMA_Cmd(DMA1_Channel7, DISABLE);
     DMA_ClearFlag(DMA1_FLAG_TC7);
 }
 
