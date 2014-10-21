@@ -1,6 +1,5 @@
 #include "main.h"
 
-
 // colors
 const uint32_t OFF_COLOR = 131074L; // ws2812_color(2, 0, 2);
 const uint32_t FIVE_COLOR = 1114129L; // ws2812_color(17, 0, 17); 
@@ -212,7 +211,7 @@ void clock_set_mode(void) {
         for(i = 0; i < 2; i++) {
             button = BUTTONS[i]; 
             if(!GPIO_ReadInputDataBit(GPIOA, button)) {
-                delay(50);
+                delay(90);
                 if(!GPIO_ReadInputDataBit(GPIOA, button)) {
                     advance(BUTTONS[i]);
                     start_millis = counter;
@@ -234,7 +233,7 @@ void check_set_mode(void) {
     for(i = 0; i < 2; i++) {
         button = BUTTONS[i];
         if(!GPIO_ReadInputDataBit(GPIOA, button)) {
-            delay(50);
+            delay(150);
             if(!GPIO_ReadInputDataBit(GPIOA, button)) {
                 clock_set_mode();
                 return;
@@ -251,20 +250,24 @@ int main(void) {
     }
 
     setup_gpio();
-    setup_rtc();
+    //setup_rtc();
+    //delay(1000);
+
     setup_timer();
     setup_dma();
 
+    //delay(1000);
+
+    GPIO_SetBits(GPIOB, GPIO_Pin_0);
+
     strip.num_leds = 60;
-    strip.brightness = 40;
+    strip.brightness = 80;
 
     uint8_t current_seconds = 0, start = 0, seconds = 0;
 
     ws2812_clear();
-    while(1) {
-        rainbow(0);
-    }
-
+    while(1) rainbow(20);
+ 
     while(1) {
         // get the current time
         RTC_TimeStructInit(&RTC_TimeStructure);

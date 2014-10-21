@@ -7,7 +7,7 @@ void setup_dma(void) {
     DMA_InitTypeDef DMA_InitStructure;
 
     DMA_DeInit(DMA1_Channel7);
-    
+
     DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&TIM2->CCR4;
     DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t)strip.dma_buffer;
     DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralDST;
@@ -15,12 +15,12 @@ void setup_dma(void) {
     DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
     DMA_InitStructure.DMA_BufferSize = 0;
     DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+    DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;
     DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
     DMA_InitStructure.DMA_Priority = DMA_Priority_Low;
     DMA_InitStructure.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel7, &DMA_InitStructure);
 
-    TIM_DMACmd(TIM2, TIM_DMA_CC4, ENABLE);
+    TIM_DMACmd(TIM2, TIM_DMA_CC2, ENABLE);
 }
 
