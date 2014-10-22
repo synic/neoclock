@@ -6,7 +6,7 @@ struct ws2812 strip;
 const uint8_t PERIOD = 59;
 const uint8_t LOW = 12;
 const uint8_t HIGH = 35;
-const uint8_t RESET_LEN = 50;
+const uint8_t RESET_LEN = 4;
 
 void ws2812_set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
     volatile uint32_t n = (led * 24);
@@ -80,17 +80,17 @@ void ws2812_show(void) {
         memaddr++;
     }
 
-    TIM_SetCounter(TIM2, PERIOD);
+    TIM_SetCounter(TIM3, PERIOD);
 
-    DMA_SetCurrDataCounter(DMA1_Channel7, buffersize);
-    DMA_Cmd(DMA1_Channel7, ENABLE);
-    TIM_Cmd(TIM2, ENABLE);
+    DMA_SetCurrDataCounter(DMA1_Channel6, buffersize);
+    DMA_Cmd(DMA1_Channel6, ENABLE);
+    TIM_Cmd(TIM3, ENABLE);
 
-    while(!DMA_GetFlagStatus(DMA1_FLAG_TC7));
+    while(!DMA_GetFlagStatus(DMA1_FLAG_TC6));
 
-    TIM_Cmd(TIM2, DISABLE);
-    DMA_Cmd(DMA1_Channel7, DISABLE);
-    DMA_ClearFlag(DMA1_FLAG_TC7);
+    TIM_Cmd(TIM3, DISABLE);
+    DMA_Cmd(DMA1_Channel6, DISABLE);
+    DMA_ClearFlag(DMA1_FLAG_TC6);
 }
 
 void rainbow(uint32_t wait) {

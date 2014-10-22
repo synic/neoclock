@@ -2,14 +2,14 @@
 #include "ws2812.h"
 
 void setup_timer(void) {
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
     TIM_TimeBaseInitTypeDef TIM_InitStructure;
     TIM_InitStructure.TIM_Period = PERIOD;
     TIM_InitStructure.TIM_Prescaler = 0;
     TIM_InitStructure.TIM_ClockDivision = 0;
     TIM_InitStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(TIM2, &TIM_InitStructure);
+    TIM_TimeBaseInit(TIM3, &TIM_InitStructure);
 
     // configure the output channel
     TIM_OCInitTypeDef TIM_OCInitStructure;
@@ -17,6 +17,8 @@ void setup_timer(void) {
     TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
     TIM_OCInitStructure.TIM_Pulse = 0;
     TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-    TIM_OC4Init(TIM2, &TIM_OCInitStructure);
+    TIM_OC1Init(TIM3, &TIM_OCInitStructure);
+
+    TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 }
 

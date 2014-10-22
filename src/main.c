@@ -2,7 +2,7 @@
 
 // colors
 const uint32_t OFF_COLOR = 131074L; // ws2812_color(2, 0, 2);
-const uint32_t FIVE_COLOR = 1114129L; // ws2812_color(17, 0, 17); 
+const uint32_t FIVE_COLOR = 1114129L; // ws2812_color(17, 0, 17);
 const uint32_t MINUTES_COLOR = 13721L; // ws2812_color(0, 53, 153);
 const uint32_t HOURS_COLOR = 3368448L; // ws2812_color(51, 102, 0);
 const uint32_t NOON_COLOR = 4587590L; // ws2812_color(70, 0, 70);
@@ -54,7 +54,7 @@ uint8_t forward(uint8_t pos, uint8_t count) {
 
 
 uint8_t backward(uint8_t pos_, uint8_t count) {
-    int8_t pos = pos_; 
+    int8_t pos = pos_;
     pos -= count % PIXELS;
     if(pos < 0) pos += 60;
     return pos;
@@ -91,7 +91,7 @@ uint32_t map_range(double x, double in_min, double in_max, double out_min,
 
 /**
  * Blends two colors.
- * 
+ *
  * This code was borrowed from Kevin Alford - https://github.com/zeroeth
  */
 uint32_t blend(uint32_t color1, uint32_t color2) {
@@ -113,13 +113,13 @@ uint32_t blend(uint32_t color1, uint32_t color2) {
 void fade_in(uint8_t start, uint8_t count, uint8_t _end) {
     uint8_t add = (float)_end / count;
     uint8_t brightness = add;
-    uint16_t _delay = (uint16_t)(FADE_TIME / (double)count - 1); 
+    uint16_t _delay = (uint16_t)(FADE_TIME / (double)count - 1);
 
     uint8_t first = 1;
     while(count > 0) {
         uint8_t led = backward(start, count);
         uint32_t color = ws2812_color(brightness, 0, brightness / 2);
-        
+
         set_color(led, color, 0);
 
         if(!first) {
@@ -172,9 +172,9 @@ void show_hours_minutes(void) {
     hours += (uint8_t)(5.0 * percent);
     start = hours;
 
-    for(i = 0; i < HOURS_LEDS; i++) { 
+    for(i = 0; i < HOURS_LEDS; i++) {
         set_color(hours, HOURS_COLOR, 1);
-        hours = backward(start, i + 1); 
+        hours = backward(start, i + 1);
     }
 
     ws2812_show();
@@ -209,7 +209,7 @@ void clock_set_mode(void) {
     uint64_t start_millis = counter;
     while(1) {
         for(i = 0; i < 2; i++) {
-            button = BUTTONS[i]; 
+            button = BUTTONS[i];
             if(!GPIO_ReadInputDataBit(GPIOA, button)) {
                 delay(90);
                 if(!GPIO_ReadInputDataBit(GPIOA, button)) {
@@ -242,17 +242,18 @@ void check_set_mode(void) {
     }
 }
 /*****************************************************************************/
-//                                  MAIN LOOP                                // 
+//                                  MAIN LOOP                                //
 /*****************************************************************************/
 int main(void) {
     if(SysTick_Config(SystemCoreClock / 1000)) {
         while(1) { }
     }
+    strip.num_leds = 60;
+    strip.brightness = 0;
 
     setup_gpio();
-    //setup_rtc();
+    setup_rtc();
     //delay(1000);
-
     setup_timer();
     setup_dma();
 
@@ -260,14 +261,11 @@ int main(void) {
 
     GPIO_SetBits(GPIOB, GPIO_Pin_0);
 
-    strip.num_leds = 60;
-    strip.brightness = 80;
-
     uint8_t current_seconds = 0, start = 0, seconds = 0;
 
     ws2812_clear();
-    while(1) rainbow(20);
- 
+/*    while(1) rainbow(0);*/
+
     while(1) {
         // get the current time
         RTC_TimeStructInit(&RTC_TimeStructure);
@@ -287,7 +285,7 @@ int main(void) {
 
         // set the brightness based on the current light input
         // TODO: this is a todo!
-        
+
         clear_strip();
         check_set_mode();
         show_hours_minutes();
