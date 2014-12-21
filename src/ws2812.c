@@ -4,9 +4,9 @@
 struct ws2812 strip;
 
 const uint8_t PERIOD = 59;
-const uint8_t LOW = 12;
-const uint8_t HIGH = 35;
-const uint8_t RESET_LEN = 4;
+const uint8_t LOW = 14;
+const uint8_t HIGH = 40;
+const uint8_t RESET_LEN = 20;
 
 void ws2812_set_color(uint8_t led, uint8_t r, uint8_t g, uint8_t b) {
     volatile uint32_t n = (led * 24);
