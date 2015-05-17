@@ -1,7 +1,7 @@
-Cmp-Mod V01 Created by Cvpcb (2014-08-23 BZR 5091)-product   date = Sun 05 Oct 2014 04:21:18 PM MDT
+Cmp-Mod V01 Created by Cvpcb 0.201505152037+5654~23~ubuntu15.04.1-product   date = Sun 17 May 2015 02:55:00 PM MDT
 
 BeginCmp
-TimeStamp = /54207155;
+TimeStamp = /55590E88;
 Reference = BT1;
 ValeurCmp = 3v;
 IdModule  = synicpretty:BK-755_12mm_coincell;
@@ -25,13 +25,6 @@ BeginCmp
 TimeStamp = /542323A3;
 Reference = C3;
 ValeurCmp = 1uF;
-IdModule  = Capacitors_SMD:C_0805;
-EndCmp
-
-BeginCmp
-TimeStamp = /5431D491;
-Reference = C4;
-ValeurCmp = 100nF;
 IdModule  = Capacitors_SMD:C_0805;
 EndCmp
 
@@ -78,13 +71,6 @@ IdModule  = Capacitors_SMD:c_elec_4x4.5;
 EndCmp
 
 BeginCmp
-TimeStamp = /5431D76D;
-Reference = C11;
-ValeurCmp = 100nF;
-IdModule  = Capacitors_SMD:C_0805;
-EndCmp
-
-BeginCmp
 TimeStamp = /5420A944;
 Reference = CON1;
 ValeurCmp = 1.2mm 5v;
@@ -113,13 +99,6 @@ IdModule  = synic:1206_polyfuse;
 EndCmp
 
 BeginCmp
-TimeStamp = /5420A63C;
-Reference = K1;
-ValeurCmp = NEO;
-IdModule  = synic:jst-3-pth-ra;
-EndCmp
-
-BeginCmp
 TimeStamp = /54209975;
 Reference = P1;
 ValeurCmp = TC2030-CTX;
@@ -127,10 +106,10 @@ IdModule  = Tag-Connect:TC2030_SMALL;
 EndCmp
 
 BeginCmp
-TimeStamp = /5420D3A0;
+TimeStamp = /55590810;
 Reference = P2;
-ValeurCmp = PHOTOR;
-IdModule  = synic:jst-2-pth-ra;
+ValeurCmp = CONN_01X03;
+IdModule  = synic:jst-3-pth-ra;
 EndCmp
 
 BeginCmp
@@ -143,13 +122,6 @@ EndCmp
 BeginCmp
 TimeStamp = /54208F51;
 Reference = R2;
-ValeurCmp = 10k;
-IdModule  = Resistors_SMD:R_0805;
-EndCmp
-
-BeginCmp
-TimeStamp = /5420D0CA;
-Reference = R3;
 ValeurCmp = 10k;
 IdModule  = Resistors_SMD:R_0805;
 EndCmp
@@ -200,14 +172,7 @@ BeginCmp
 TimeStamp = /54231228;
 Reference = U2;
 ValeurCmp = TLV702xx;
-IdModule  = SMD_Packages:SOT-23-5;
-EndCmp
-
-BeginCmp
-TimeStamp = /5431C46F;
-Reference = U3;
-ValeurCmp = TXS0101;
-IdModule  = SMD_Packages:SOT-23-6;
+IdModule  = SOT23-5:SOT23-5;
 EndCmp
 
 BeginCmp
@@ -232,9 +197,9 @@ IdModule  = synicpretty:TESTPOINT;
 EndCmp
 
 BeginCmp
-TimeStamp = /5420907D;
-Reference = X1;
-ValeurCmp = 32.768KHz;
+TimeStamp = /5559168C;
+Reference = Y1;
+ValeurCmp = 32.768 KHz;
 IdModule  = synic:2_SMD_CRYSTAL_3.2x1.5;
 EndCmp
 
