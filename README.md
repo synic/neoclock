@@ -1,4 +1,4 @@
 neoclock
 ========
 
-An Arduino based NeoPixel clock
+A ws2812 clock
