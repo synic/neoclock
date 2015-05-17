@@ -1,16 +1,9 @@
 #include "rtc.h"
 
-RTC_TimeTypeDef RTC_TimeStructure;
-RTC_InitTypeDef RTC_InitStructure;
 __IO uint32_t AsynchPrediv = 0, SynchPrediv = 0;
 
 
-void set_time(void) {
-    RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
-    RTC_TimeStructure.RTC_Hours = 0;
-    RTC_TimeStructure.RTC_Minutes = 0;
-    RTC_TimeStructure.RTC_Seconds = 1;
-    
+void set_time(RTC_TimeTypeDef RTC_TimeStructure) {
     if(RTC_SetTime(RTC_Format_BIN, &RTC_TimeStructure) != ERROR) {
         RTC_WriteBackupRegister(RTC_BKP_DR0, 0x32F2);
     }
@@ -40,8 +33,8 @@ void rtc_config(void) {
 
     RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
     
-    SynchPrediv = 0xFF;
     AsynchPrediv = 0x7F;
+    SynchPrediv = 0xFF;
 
 #else
   #error Please select the RTC Clock source inside the main.c file
@@ -53,6 +46,7 @@ void rtc_config(void) {
 }
 
 void setup_rtc(void) {
+    RTC_InitTypeDef RTC_InitStructure;
 #if defined (RTC_CLOCK_SOURCE_LSI)   
     RCC_LSICmd(ENABLE);
 #endif  
@@ -68,7 +62,12 @@ void setup_rtc(void) {
             printf("RTC Prescaler Config Failed");
         }
 
-        set_time(); 
+        RTC_TimeTypeDef RTC_TimeStructure;
+        RTC_TimeStructure.RTC_H12 = RTC_H12_AM;
+        RTC_TimeStructure.RTC_Hours = 0;
+        RTC_TimeStructure.RTC_Minutes = 0;
+        RTC_TimeStructure.RTC_Seconds = 1;
+        set_time(RTC_TimeStructure); 
     }
     else {
         if(RCC_GetFlagStatus(RCC_FLAG_PORRST) != RESET) {
