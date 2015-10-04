@@ -72,3 +72,6 @@ format
 *.bak
 .build/
 *.kicad_pcb-bak
+
+# TAGS
+TAGS
