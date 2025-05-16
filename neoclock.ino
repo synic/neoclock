@@ -82,7 +82,7 @@ public:
 #define HOUR_RATE_LIMIT 100
 #define SETTING_RATE_LIMIT 500
 #define INDICATOR_DURATION 700
-#define MAX_BRIGHTNESS 255
+#define MAX_BRIGHTNESS 153
 #define SYNC_MAX 3600
 #define DIAGNOSTIC_BRIGHTNESS 20
 #define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
@@ -106,7 +106,7 @@ public:
 #define HOUR_LED_COUNT 1
 #define SECOND_LED_COUNT 18
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ400);
 NeoPixelStrip ledStrip(strip);
 RTC_DS3231 RTC;
 
@@ -210,8 +210,9 @@ const uint8_t brightnessLevels[] = {
     40,    // Level 1: Very dim
     60,    // Level 2: Dim
     102,   // Level 4: Medium-low
-    153,   // Level 5: Medium
-    255    // Level 7: Full brightness
+    MAX_BRIGHTNESS,   // Level 5: Medium
+    // disabled due to wire gauge constraints
+    // 255    // Level 7: Full brightness 
 };
 
 uint8_t BUTTON_PINS[] = {HOUR_BUTTON, MINUTE_BUTTON, BRIGHTNESS_BUTTON, MODE_BUTTON};
