@@ -1,157 +1,237 @@
-######################################
-# STM32F10x Makefile
-######################################
+# Makefile for Arduino based scketches
+#
+# Copyright 2020 Valerio Di Giampietro http://va.ler.io v@ler.io
+# MIT License - see License.txt file
+#
+# This Makefile uses the arduino-cli, the Arduino command line interface
+# and has been designed and tested to run on Linux, not on Windows.
+# Probably it will run on a Mac, but it has not been tested.
+#
+# Please note that:
+#
+#   1. each sketch must reside in his own folder with this Makefile
+#
+#   2. the main make targets are:
+#      - all     compiles and upload
+#      - compile compiles only
+#      - upload  upload via serial port, compile if the binary file is
+#                not available
+#      - ota     upload Over The Air, automatically find the device
+#                IP address using the IOT_NAME (device hostname)
+#      - clean   clean the build directory
+#      - find    find OTA updatable devices on the local subnet
+#      - requirements it the file "requirements.txt" exists it will
+#                     install the libraries listed in this file
+#
+#      default is "all"
+#
+#   3. it gets the name of the sketch using the wildcard make command;
+#      the name is *.ino; this means that you must have ONLY a file
+#      with .ino extension, otherwise this makefile will break.  This
+#      also means that you can use this Makefile, almost unmodified,
+#      for any sketch as long as you keep a single .ino file in each
+#      folder
+#
+#   4. you can split your project in multiple files, if you wish,
+#      using a single .ino file and multiple .h files, that you can
+#      include in the .ino file with an '#include "myfile.h"'
+#      directive
+#
+# Optionally some environment variables can be set:
+#
+#   FQBN        Fully Qualified Board Name; if not set in the environment
+#               it will be assigned a value in this makefile
+#
+#   SERIAL_DEV  Serial device to upload the sketch; if not set in the
+#               environment it will be assigned:
+#               /dev/ttyUSB0   if it exists, or
+#               /dev/ttyACM0   if it exists, or
+#               unknown
+#
+#   IOT_NAME    Name of the IOT device; if not set in the environment
+#               it will be assigned a value in this makefile. This is
+#               very useful for OTA update, the device will be searched
+#               on the local subnet using this name
+#
+#   OTA_PORT    Port used by OTA update; if not set in the environment
+#               it will be assigned the default value of 8266 in this
+#               makefile
+#
+#   OTA_PASS    Password used for OTA update; if not set in the environment
+#               it will be assigned the default value of an empty string
+#
+#   V           verbose flag; can be 0 (quiet) or 1 (verbose); if not set
+#               in the environment it will be assigned a default value
+#               in this makefile
+#
+#   CUSTOM_LIBS optional custom libraris in the from
+#               "--libraries libpath1,libpath2,..." by default it is
+#               the empty string or the "--libraries libraries" if this
+#               dir exists
 
-######################################
-# target
-######################################
-TARGET = NeoClock
+OSFAMILY    := $(shell ( uname | sed "s/-.*//" ))
+MAKE_DIR    := $(PWD)
+GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
+#
+# in vars.mak usually some or all of the following variables are defined
+#    FQBN
+#    IOT_NAME
+#    OTA_PORT
+#    OTA_PASS
+#    SERIAL_DEV
+-include vars.mak
 
-######################################
-# building variables
-######################################
-# debug build?
-DEBUG = 1
-# build for debug in ram?
-RAMBUILD = 0
-# optimization
-OPT = -O0 
+#
+# ----- setup for ESP32 LilyGo T3 v 1.6.1
+#FQBN        ?= esp32:esp32:lilygo_t_display_s3
 
-#######################################
-# paths
-#######################################
-# source path
-VPATH = src startup
-# firmware library path
-PERIPHLIBPATH = ./periphlib
-#VPATH += $(PERIPHLIBPATH)/CMSIS/CM3/CoreSupport
-#VPATH += $(PERIPHLIBPATH)/CMSIS/CM3/DeviceSupport/ST/STM32F10x
-#VPATH += $(PERIPHLIBPATH)/STM32F10x_StdPeriph_Driver/src
+# ----- setup wor Wemos D1 mini -----
+#FQBN       ?= esp8266:esp8266:d1_mini
 
-VPATH += $(PERIPHLIBPATH)/CMSIS/Device/ST/STM32F30x
-VPATH += $(PERIPHLIBPATH)/STM32F30x_StdPeriph_Driver/src
-# Build path
-BUILD_DIR = build
+# ----- setup wor ESP32 NodeMCU -----
+#FQBN        ?= esp32:esp32:esp32
 
-# #####################################
-# source
-# #####################################
-SRCS = \
-  main.c \
-  stm32f30x_it.c \
-  system_stm32f30x.c
- 
-SRCSASM = \
-  startup_stm32f30x.s 
+# ----- setup for Arduino Uno
+FQBN        ?= arduino:avr:uno
 
-# #####################################
-# firmware library
-# #####################################
-#   core_cm0.c 
-PERIPHLIB_SOURCES = \
-  dma.c \
-  gpio.c \
-  rtc.c \
-  timer.c \
-  ws2812.c \
-  aolib.c \
-  stm32f30x_gpio.c \
-  stm32f30x_rcc.c \
-  stm32f30x_tim.c \
-  stm32f30x_pwr.c \
-  stm32f30x_exti.c \
-  stm32f30x_dma.c \
-  stm32f30x_rtc.c
+#IOT_NAME    ?= blink-arduino
+#OTA_PORT   ?= 3232
+#OTA_PASS   ?=
+#
+# --- Upload Speed Label: the "arduino-cli upload" command uses "baud" or UploadSpeed to specify
+#     the board upload speed, the following variable will heve the correct value
+SPEEDLABEL = $(shell arduino-cli board details -f -b $(FQBN) --format json | egrep -i 'baud|UploadSpeed' |tr '"' ' ' | awk '{print $$3}')
 
-#######################################
-# binaries
-#######################################
-CC = arm-none-eabi-gcc
-AS = arm-none-eabi-gcc -x assembler-with-cpp
-CP = arm-none-eabi-objcopy
-AR = arm-none-eabi-ar
-SZ = arm-none-eabi-size
-HEX = $(CP) -O ihex
-BIN = $(CP) -O binary -S
- 
-#######################################
-# CFLAGS
-#######################################
-# macros for gcc
-DEFS = -DSTM32F30x -DUSE_STDPERIPH_DRIVER
-ifeq ($(RAMBUILD), 1)
-DEFS += -DVECT_TAB_SRAM
+ifdef GIT_VERSION
+  CFLAGS = --build-property compiler.cpp.extra_flags=-DMYVERSION=\"$(GIT_VERSION)\"
+else
+  CFLAGS =
 endif
-ifeq ($(DEBUG), 1)
-DEFS += -DDEBUG -D_DEBUG
+
+V          ?= 0
+VFLAG      =
+
+ifeq "$(V)" "1"
+VFLAG      =-v
 endif
-# includes for gcc
-INCLUDES = -Iinc
-# INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/CM3/CoreSupport
-# INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/CM3/DeviceSupport/ST/STM32F10x
-# INCLUDES += -I$(PERIPHLIBPATH)/STM32F10x_StdPeriph_Driver/inc
-INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/Device/ST/STM32F30x/Include
-INCLUDES += -I$(PERIPHLIBPATH)/STM32F30x_StdPeriph_Driver/inc
-INCLUDES += -I$(PERIPHLIBPATH)/CMSIS/Include
-# compile gcc flags
-CFLAGS = -mthumb -mcpu=cortex-m4 $(DEFS) $(INCLUDES) $(OPT) -Wall -fno-common -fdata-sections -ffunction-sections
-# ifeq ($(DEBUG), 1)
-CFLAGS += -g -gdwarf-2 -fno-common -fdata-sections -ffunction-sections
-# endif
-# Generate dependency information
-CFLAGS += -MD -MP -MF .dep/$(@F).d
-
-#######################################
-# LDFLAGS
-#######################################
-# link script
-LDSCRIPT = linker/STM32F303VC_FLASH.ld
-# libraries
-LIBS = -Wl,--start-group -lc -lm -lgcc -lnosys -Wl,--end-group
-LIBDIR =
-LDFLAGS = -mthumb -mcpu=cortex-m4 -specs=nano.specs -T$(LDSCRIPT) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections --static -nostartfiles
 
 
-# default action: build all
-all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex
+ifndef SERIAL_DEV
+  ifneq (,$(wildcard /dev/ttyUSB0))
+    SERIAL_DEV = /dev/ttyUSB0
+  else ifneq (,$(wildcard /dev/ttyACM0))
+    SERIAL_DEV = /dev/ttyACM0
+  else ifneq (,$(wildcard /dev/cu.usbserial*))
+    SERIAL_DEV = $(wildcard /dev/cu.usbserial*)
+  else
+    SERIAL_DEV = unknown
+  endif
+endif
 
 
-#######################################
-# build the application
-#######################################
-# list of firmware library objects
-PERIPHLIB_OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(PERIPHLIB_SOURCES:.c=.o)))
-# list of C program objects
-OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(SRCS:.c=.o)))
-# list of ASM program objects
-OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(SRCSASM:.s=.o)))
 
-$(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
-	$(CC) -c $(CFLAGS) $< -o $@
+ifndef CUSTOM_LIBS
+  ifneq (,$(wildcard libraries))
+    CUSTOM_LIBS = --libraries libraries
+  else
+    CUSTOM_LIBS = 
+  endif
+endif
 
-$(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+BUILD_DIR  := $(subst :,.,build/$(FQBN))
 
-$(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(PERIPHLIB_OBJECTS) Makefile
-	$(CC) $(OBJECTS) $(PERIPHLIB_OBJECTS) $(LDFLAGS) -o $@
-	$(SZ) $@
-	
-$(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
-	$(HEX) $< $@
-	
-$(BUILD_DIR):
-	mkdir -p $@
+SRCINO     := $(wildcard *.ino)
+SRC        := $(wildcard *.ino *.c *.cpp mylib/*/*.ino) 
+HDRS       := $(wildcard *.h mylib/*/*.h)
+BIN        := $(BUILD_DIR)/$(SRCINO).bin
+ELF        := $(BUILD_DIR)/$(SRCINO).elf
+
+$(info OSFAMILY    is [${OSFAMILY}])
+$(info GIT_VERSION is [${GIT_VERSION}])
+$(info FQBN        is [${FQBN}])
+$(info IOT_NAME    is [${IOT_NAME}])
+$(info IOT_IP      is [${IOT_IP}])
+$(info OTA_PORT    is [${OTA_PORT}])
+$(info OTA_PASS    is [${OTA_PASS}])
+$(info V           is [${V}])
+$(info VFLAG       is [${VFLAG}])
+$(info MAKE_DIR    is [${MAKE_DIR}])
+$(info BUILD_DIR   is [${BUILD_DIR}])
+$(info SRCINO      is [${SRCINO}])
+$(info SRC         is [${SRC}])
+$(info HDRS        is [${HDRS}])
+$(info BIN         is [${BIN}])
+$(info SERIAL_DEV  is [${SERIAL_DEV}])
+$(info CUSTOM_LIBS is [${CUSTOM_LIBS}])
+$(info SPEEDLABEL  is [${SPEEDLABEL}])
 
 
-#######################################
-# delete all user application files
-#######################################
+all: $(ELF) upload
+.PHONY: all
+
+compile: $(ELF)
+.PHONY: compile
+
+$(ELF): $(SRC) $(HDRS)
+	arduino-cli compile -b $(FQBN) --build-path $(BUILD_DIR) $(VFLAG) $(CUSTOM_LIBS) $(CFLAGS)
+	@if which arduino-manifest.pl; \
+	then echo "---> Generating manifest.txt"; \
+	arduino-manifest.pl -b $(FQBN) $(SRC) $(HDRS) > manifest.txt.new; \
+	if diff manifest.txt manifest.txt.new > /dev/null; \
+	then echo "---> manifest.txt is up to date (has not changed)"; \
+	rm -f manifest.txt.new; \
+	else mv -f manifest.txt.new manifest.txt; \
+	fi; \
+	else echo "---> If you want to generate manifest.txt, listing used libraries and their versions,"; \
+	echo "---> please install arduino-manifest, see https://github.com/digiampietro/arduino-manifest"; \
+	fi
+
+upload: compile
+	@if [ ! -c $(SERIAL_DEV) ] ; \
+	then echo "---> ERROR: Serial Device not available, please set the SERIAL_DEV environment variable" ; \
+	else echo "---> Uploading sketch\n"; \
+	arduino-cli upload -v -b $(FQBN) -p $(SERIAL_DEV)  --input-dir $(BUILD_DIR) $(VFLAG) ; \
+	fi
+
+ota: compile
+	@PLAT_PATH=`arduino-cli compile -b $(FQBN) --show-properties | grep '^runtime.platform.path' | awk -F= '{print $$2}'` ; \
+	   PY_PATH=`which python3 | xargs dirname` ; \
+	if [[ "$(OSFAMILY)" = "Linux" && "$(IOT_IP)" = "" ]] ; \
+	then IOT_IP=`avahi-browse _arduino._tcp --resolve --parsable --terminate|grep -i ';$(IOT_NAME);'|grep ';$(OTA_PORT);'| awk -F\; '{print $$8}'|head -1`; \
+	elif [[ "$(OSFAMILY)" = "Darwin" && "$(IOT_IP)" = "" ]] ; \
+	then IOT_IP=`(timeout 3 dns-sd -G v4 $(IOT_NAME).local | grep $(IOT_NAME).local)  | awk '{print $$6}'` ; \
+	fi ; \
+	BINFILE=$(wildcard $(BIN)); \
+	echo "PLAT_PATH   is [$$PLAT_PATH]" ; \
+	echo "PY_PATH:    is [$$PY_PATH]"  ; \
+	echo "IOT_IP:     is [$$IOT_IP]"   ; \
+	echo "BINFILE:    is [$$BINFILE]"  ; \
+	if [ "$$IOT_IP" = "" ] ; \
+	then if [ "$(OSFAMILY)" = "Linux" -o "$(OSFAMILY)" = "Darwin" ] ; \
+	then echo "Unable to find device IP. Check that the IOT_NAME environment variable is correctly set. Use 'make find' to search devices"; \
+	else echo "IOT_IP variable not set, you have to set this variable to the IP address of your device"; \
+	fi; \
+	else echo "---> Uploading Over The Air"; \
+	$$PY_PATH/python3 $$PLAT_PATH/tools/espota.py -i $$IOT_IP -p $(OTA_PORT) --auth=$(OTA_PASS) -f $$BINFILE ;\
+	fi
+
 clean:
-	-rm -fR .dep $(BUILD_DIR)
-  
-#
-# Include the dependency files, should be the last of the makefile
-#
--include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+	@echo "---> Cleaning the build directory"
+	rm -rf build
 
-# *** EOF ***
+find:
+	@if [ "$(OSFAMILY)" = "Linux" ] ;   \
+	then  avahi-browse _arduino._tcp --resolve --parsable --terminate ; \
+	elif [ "$(OSFAMILY)" = "Darwin" ] ; \
+	then  timeout 5 dns-sd -B _arduino._tcp ; echo; \
+	else  echo "---> In this OS *find* is not supported; lease set the IOT_IP environment variable to the IP address of your device" ; \
+	fi
+
+requirements:
+	@if [ -e requirements.txt ]; \
+	then while read -r i ; do echo ; \
+	  echo "---> Installing " '"'$$i'"' ; \
+	  arduino-cli lib install "$$i" ; \
+	done < requirements.txt ; \
+	else echo "---> MISSING requirements.txt file"; \
+	fi

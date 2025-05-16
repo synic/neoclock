@@ -71,6 +71,7 @@ _autosave*
 format
 *.bak
 .build/
+build/
 *.kicad_pcb-bak
 
 # TAGS
