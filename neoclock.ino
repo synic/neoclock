@@ -858,8 +858,6 @@ void animateSecond(uint8_t start, uint8_t count, uint8_t _end) {
     uint8_t brightness = add;
     uint16_t _delay = (500 / count) - 1;
 
-    const ColorScheme& scheme = colorSchemes[currentColorScheme];
-
     while(count > 0) {
         uint8_t led = seekBackward(start, count);
         uint32_t color = strip.Color(brightness, 0, brightness / 2);
