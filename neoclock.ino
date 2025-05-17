@@ -3,6 +3,43 @@
 #include <RTClib.h>
 #include <EEPROM.h>
 
+class SerialWrapper {
+private:
+    bool initialized = false;
+    
+    void ensureInitialized() {
+        if (!initialized) {
+            Serial.begin(115200);
+            delay(1000);
+            Serial.println("Serial initialized");
+            initialized = true;
+        }
+    }
+    
+public:
+    void print(const char* str) {
+        ensureInitialized();
+        Serial.print(str);
+    }
+    
+    void println(const char* str) {
+        ensureInitialized();
+        Serial.println(str);
+    }
+    
+    void print(int val) {
+        ensureInitialized();
+        Serial.print(val);
+    }
+    
+    void println(int val) {
+        ensureInitialized();
+        Serial.println(val);
+    }
+};
+
+SerialWrapper Debug;
+
 class NeoPixelStrip {
 private:
     Adafruit_NeoPixel& strip;
@@ -265,9 +302,6 @@ void resetToDefaults() {
 }
 
 void setup() {
-    Serial.begin(115200);
-    Serial.println("Starting NeoClock...");
-    
     strip.begin();
     ledStrip.begin();
     clearStrip();
@@ -316,10 +350,7 @@ void setup() {
         delayAndCheckButtons(5);
     }
     
-    if(rtcDiagnosticMode) {
-        Serial.println("Running RTC diagnostics...");
-        runRTCDiagnostics();
-    }
+    runRTCDiagnostics();
     
     for(uint8_t i = 0; i < 4; i++) {
         if(digitalRead(BUTTON_PINS[i]) != HIGH) {
@@ -337,14 +368,14 @@ void setup() {
     }
     
     if(!rtcWorking) {
-        Serial.println("RTC not working, using fallback time");
+        Debug.println("RTC not working, using fallback time");
         fallbackHour = 12;
         fallbackMinute = 0;
         fallbackSecond = 0;
         now = DateTime(2020, 1, 1, fallbackHour, fallbackMinute, fallbackSecond);
         previousReading = now;
     } else {
-        Serial.println("RTC initialized successfully");
+        Debug.println("RTC initialized successfully");
         now = RTC.now();
         previousReading = now;
     }
@@ -353,7 +384,6 @@ void setup() {
     
     updateBrightness();
     renderClockFace();
-    Serial.println("Setup complete");
 }
 
 void runRTCDiagnostics() {
@@ -363,29 +393,24 @@ void runRTCDiagnostics() {
     byte error, address;
     int deviceCount = 0;
     
-    Serial.println("Scanning I2C bus...");
     for(address = 1; address < 127; address++) {
         Wire.beginTransmission(address);
         error = Wire.endTransmission();
         
         if(error == 0) {
             deviceCount++;
-            Serial.print("I2C device found at address 0x");
-            if(address < 16) Serial.print("0");
-            Serial.println(address, HEX);
         }
     }
     
     if(deviceCount == 0) {
-        Serial.println("No I2C devices found!");
+        Debug.println("No I2C devices found!");
         showDiagnosticPattern(I2C_ERROR_COLOR);
         rtcWorking = false;
         return;
     }
     
-    Serial.println("Initializing RTC...");
     if(!RTC.begin()) {
-        Serial.println("RTC initialization failed!");
+        Debug.println("RTC initialization failed!");
         showDiagnosticPattern(RTC_ERROR_COLOR);
         rtcWorking = false;
         return;
@@ -399,12 +424,11 @@ void runRTCDiagnostics() {
     if(Wire.available()) {
         byte reg0 = Wire.read();
         if(reg0 & 0x80) {
-            Serial.println("RTC stopped, adjusting time...");
+            Debug.println("RTC stopped, adjusting time...");
             RTC.adjust(DateTime(__DATE__, __TIME__));
         }
     }
     
-    Serial.println("RTC diagnostics passed");
     showDiagnosticPattern(SUCCESS_COLOR);
     rtcWorking = true;
 }
@@ -434,12 +458,12 @@ void showDiagnosticPattern(uint32_t color) {
     uint8_t oldBrightness = strip.getBrightness();
     strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
 
-    Serial.print("Showing diagnostic pattern: ");
-    if(color == ERROR_COLOR) Serial.println("ERROR");
-    else if(color == I2C_ERROR_COLOR) Serial.println("I2C ERROR");
-    else if(color == RTC_ERROR_COLOR) Serial.println("RTC ERROR");
-    else if(color == WARNING_COLOR) Serial.println("WARNING");
-    else Serial.println("SUCCESS");
+    Debug.print("Showing diagnostic pattern: ");
+    if(color == ERROR_COLOR) Debug.println("ERROR");
+    else if(color == I2C_ERROR_COLOR) Debug.println("I2C ERROR");
+    else if(color == RTC_ERROR_COLOR) Debug.println("RTC ERROR");
+    else if(color == WARNING_COLOR) Debug.println("WARNING");
+    else Debug.println("SUCCESS");
     
     for(int i = 0; i < PIXELS; i++) {
         strip.setPixelColor(i, OFF_COLOR);
@@ -544,6 +568,7 @@ void checkRTCStatus() {
                 
                 if(failCount >= 3) {
                     rtcWorking = false;
+                    Debug.println("RTC failed after multiple attempts");
                     
                     fallbackHour = previousReading.hour();
                     fallbackMinute = previousReading.minute();
@@ -571,23 +596,8 @@ void delayAndCheckButtons(uint16_t time) {
 }
 
 void checkNeedToPerformAction() {
-    static unsigned long lastButtonDebug = 0;
-    if(millis() - lastButtonDebug >= 1000) {
-        Serial.print("Button States - Hour: ");
-        Serial.print(digitalRead(HOUR_BUTTON));
-        Serial.print(" Minute: ");
-        Serial.print(digitalRead(MINUTE_BUTTON));
-        Serial.print(" Brightness: ");
-        Serial.print(digitalRead(BRIGHTNESS_BUTTON));
-        Serial.print(" Mode: ");
-        Serial.println(digitalRead(MODE_BUTTON));
-        lastButtonDebug = millis();
-    }
-
     if(digitalRead(HOUR_BUTTON) == LOW && digitalRead(BRIGHTNESS_BUTTON) == LOW) {
-        Serial.println("Hour + Brightness buttons pressed - Reset mode");
         if(millis() - lastClearTime >= SETTING_RATE_LIMIT) {
-            Serial.println("Resetting to defaults");
             clearEEPROM();
             resetToDefaults();
             lastClearTime = millis();
@@ -596,15 +606,8 @@ void checkNeedToPerformAction() {
     }
 
     if(digitalRead(MODE_BUTTON) == LOW) {
-        Serial.println("Mode button pressed");
         if(millis() - lastActionTime[2] >= 50) {
             currentSettingMode = (SettingMode)((currentSettingMode + 1) % 3);
-            Serial.print("Setting mode changed to: ");
-            switch(currentSettingMode) {
-                case SETTING_BRIGHTNESS: Serial.println("Brightness"); break;
-                case SETTING_MODE: Serial.println("Display Mode"); break;
-                case SETTING_COLOR_SCHEME: Serial.println("Color Scheme"); break;
-            }
             showSettingIndicator(currentSettingMode);
             lastActionTime[2] = millis();
         }
@@ -612,13 +615,10 @@ void checkNeedToPerformAction() {
     }
 
     if(digitalRead(BRIGHTNESS_BUTTON) == LOW) {
-        Serial.println("Brightness button pressed");
         if(millis() - lastActionTime[3] >= SETTING_RATE_LIMIT) {
             switch(currentSettingMode) {
                 case SETTING_BRIGHTNESS:
                     currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels)/sizeof(brightnessLevels[0]));
-                    Serial.print("Brightness level changed to: ");
-                    Serial.println(currentBrightnessLevel);
                     updateBrightness();
                     brightnessChanged = true;
                     saveSettings();
@@ -626,8 +626,6 @@ void checkNeedToPerformAction() {
                     
                 case SETTING_MODE:
                     currentMode = (currentMode + 1) % MODES_PER_SCHEME;
-                    Serial.print("Display mode changed to: ");
-                    Serial.println(currentMode);
                     modeChanged = true;
                     saveSettings();
                     renderClockFace();
@@ -635,8 +633,6 @@ void checkNeedToPerformAction() {
                     
                 case SETTING_COLOR_SCHEME:
                     currentColorScheme = (currentColorScheme + 1) % COLOR_SCHEME_COUNT;
-                    Serial.print("Color scheme changed to: ");
-                    Serial.println(currentColorScheme);
                     EEPROM.write(EEPROM_COLOR_SCHEME_ADDR, currentColorScheme);
                     renderClockFace();
                     break;
@@ -649,18 +645,10 @@ void checkNeedToPerformAction() {
     for(uint8_t i = 0; i < 2; i++) {
         int reading = digitalRead(BUTTON_PINS[i]);
         
-        if(reading != lastButtonState[i]) {
-            Serial.print(i == 0 ? "Hour" : "Minute");
-            Serial.print(" button state changed to: ");
-            Serial.println(reading == LOW ? "LOW" : "HIGH");
-        }
-        
         if(reading == LOW) {
             unsigned long rateLimit = (i == 0) ? HOUR_RATE_LIMIT : MINUTE_RATE_LIMIT;
             
             if(millis() - lastActionTime[i] >= rateLimit) {
-                Serial.print(i == 0 ? "Hour" : "Minute");
-                Serial.println(" button pressed");
                 performAction(BUTTON_PINS[i]);
                 lastActionTime[i] = millis();
             }
@@ -679,29 +667,21 @@ void performAction(uint8_t buttonPin) {
             if(hour >= 24) hour = 0;
             now = DateTime(now.year(), now.month(), now.day(), hour, 
                 now.minute(), now.second());
-            Serial.print("Hour adjusted to: ");
-            Serial.println(hour);
         }
         else if(buttonPin == MINUTE_BUTTON) {
             uint8_t minute = now.minute() + 1;
             if(minute > 59) minute = 0;
             now = DateTime(now.year(), now.month(), now.day(), now.hour(), 
                 minute, now.second());
-            Serial.print("Minute adjusted to: ");
-            Serial.println(minute);
         }
         else if(buttonPin == BRIGHTNESS_BUTTON) {
             currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels)/sizeof(brightnessLevels[0]));
-            Serial.print("Brightness level changed to: ");
-            Serial.println(currentBrightnessLevel);
             updateBrightness();
             brightnessChanged = true;
             saveSettings();
         }
         else if(buttonPin == MODE_BUTTON) {
             currentMode = (currentMode + 1) % MODES_PER_SCHEME;
-            Serial.print("Display mode changed to: ");
-            Serial.println(currentMode);
             modeChanged = true;
             saveSettings();
         }
@@ -712,38 +692,28 @@ void performAction(uint8_t buttonPin) {
             
             DateTime verify = RTC.now();
             if(verify.hour() != now.hour() || verify.minute() != now.minute()) {
-                Serial.println("RTC adjustment failed!");
+                Debug.println("RTC adjustment failed!");
                 showDiagnosticPattern(ERROR_COLOR);
                 now = oldTime;
-            } else {
-                Serial.println("RTC adjustment successful");
             }
         }
     } else {
         if(buttonPin == HOUR_BUTTON) {
             fallbackHour++;
             if(fallbackHour >= 24) fallbackHour = 0;
-            Serial.print("Fallback hour adjusted to: ");
-            Serial.println(fallbackHour);
         }
         else if(buttonPin == MINUTE_BUTTON) {
             fallbackMinute++;
             if(fallbackMinute >= 60) fallbackMinute = 0;
-            Serial.print("Fallback minute adjusted to: ");
-            Serial.println(fallbackMinute);
         }
         else if(buttonPin == BRIGHTNESS_BUTTON) {
             currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels)/sizeof(brightnessLevels[0]));
-            Serial.print("Brightness level changed to: ");
-            Serial.println(currentBrightnessLevel);
             updateBrightness();
             brightnessChanged = true;
             saveSettings();
         }
         else if(buttonPin == MODE_BUTTON) {
             currentMode = (currentMode + 1) % MODES_PER_SCHEME;
-            Serial.print("Display mode changed to: ");
-            Serial.println(currentMode);
             modeChanged = true;
             saveSettings();
         }
