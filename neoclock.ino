@@ -163,6 +163,9 @@ public:
 #define BRIGHTNESS_BUTTON 15
 #define MODE_BUTTON 18
 
+#define I2C_SDA A4
+#define I2C_SCL A5
+
 #define ROTATE 0
 
 #define COLOR_SCHEME_COUNT 11
@@ -441,7 +444,7 @@ void setup()
 
 void runRTCDiagnostics()
 {
-    Wire.begin();
+    Wire.begin(I2C_SDA, I2C_SCL);
     delay(100);
 
     Wire.setClock(10000);
