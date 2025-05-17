@@ -3,107 +3,140 @@
 #include <RTClib.h>
 #include <EEPROM.h>
 
-class SerialWrapper {
+class SerialWrapper
+{
 private:
     bool initialized = false;
-    
-    void ensureInitialized() {
-        if (!initialized) {
+
+    void ensureInitialized()
+    {
+        if (!initialized)
+        {
             Serial.begin(115200);
             delay(1000);
             Serial.println("Serial initialized");
             initialized = true;
         }
     }
-    
+
 public:
-    void print(const char* str) {
+    void print(const char *str)
+    {
         ensureInitialized();
         Serial.print(str);
     }
-    
-    void println(const char* str) {
+
+    void println(const char *str)
+    {
         ensureInitialized();
         Serial.println(str);
     }
-    
-    void print(int val) {
+
+    void print(int val)
+    {
         ensureInitialized();
         Serial.print(val);
     }
-    
-    void println(int val) {
+
+    void println(int val)
+    {
         ensureInitialized();
         Serial.println(val);
+    }
+
+    void print(byte val, int format)
+    {
+        ensureInitialized();
+        Serial.print(val, format);
+    }
+
+    void println(byte val, int format)
+    {
+        ensureInitialized();
+        Serial.println(val, format);
     }
 };
 
 SerialWrapper Debug;
 
-class NeoPixelStrip {
+class NeoPixelStrip
+{
 private:
-    Adafruit_NeoPixel& strip;
-    uint32_t* pixelHistory;
-    bool* pixelDirty;
+    Adafruit_NeoPixel &strip;
+    uint32_t *pixelHistory;
+    bool *pixelDirty;
     const uint16_t pixelCount;
 
 public:
-    NeoPixelStrip(Adafruit_NeoPixel& _strip) : 
-        strip(_strip), 
-        pixelCount(_strip.numPixels()) {
+    NeoPixelStrip(Adafruit_NeoPixel &_strip) : strip(_strip),
+                                               pixelCount(_strip.numPixels())
+    {
         pixelHistory = new uint32_t[pixelCount];
         pixelDirty = new bool[pixelCount];
-        for(uint16_t i = 0; i < pixelCount; i++) {
+        for (uint16_t i = 0; i < pixelCount; i++)
+        {
             pixelHistory[i] = 0;
             pixelDirty[i] = false;
         }
     }
 
-    ~NeoPixelStrip() {
+    ~NeoPixelStrip()
+    {
         delete[] pixelHistory;
         delete[] pixelDirty;
     }
 
-    void setPixelColor(uint16_t n, uint32_t c, bool saveToHistory = true) {
-        if(saveToHistory) {
+    void setPixelColor(uint16_t n, uint32_t c, bool saveToHistory = true)
+    {
+        if (saveToHistory)
+        {
             pixelHistory[n] = c;
             pixelDirty[n] = true;
         }
         strip.setPixelColor(n, c);
     }
 
-    uint32_t getPixelColor(uint16_t n) {
+    uint32_t getPixelColor(uint16_t n)
+    {
         return strip.getPixelColor(n);
     }
 
-    uint32_t getPixelHistory(uint16_t n) {
+    uint32_t getPixelHistory(uint16_t n)
+    {
         return pixelHistory[n];
     }
 
-    void show() {
+    void show()
+    {
         strip.show();
     }
 
-    void clear() {
-        for(uint16_t i = 0; i < pixelCount; i++) {
+    void clear()
+    {
+        for (uint16_t i = 0; i < pixelCount; i++)
+        {
             pixelDirty[i] = false;
         }
         strip.clear();
     }
 
-    void begin() {
+    void begin()
+    {
         strip.begin();
     }
 
-    void setBrightness(uint8_t b) {
+    void setBrightness(uint8_t b)
+    {
         strip.setBrightness(b);
     }
 
-    uint8_t getBrightness() {
+    uint8_t getBrightness()
+    {
         return strip.getBrightness();
     }
 
-    uint16_t numPixels() {
+    uint16_t numPixels()
+    {
         return pixelCount;
     }
 };
@@ -153,9 +186,9 @@ uint32_t I2C_ERROR_COLOR = strip.Color(0, 255, 128);
 uint32_t BUTTON_ERROR_COLOR = strip.Color(128, 0, 128);
 uint32_t RTC_ERROR_COLOR = strip.Color(255, 0, 0);
 uint32_t WARNING_COLOR = strip.Color(255, 128, 0);
-uint32_t SUCCESS_COLOR = strip.Color(0, 255, 0);
 
-struct ColorScheme {
+struct ColorScheme
+{
     uint32_t markerColor;
     uint32_t hourColor;
     uint32_t minuteColor;
@@ -165,90 +198,89 @@ struct ColorScheme {
 const ColorScheme colorSchemes[COLOR_SCHEME_COUNT] = {
     // Default - Purple markers, green/blue hands
     {
-        strip.Color(51, 0, 51),    // marker
-        strip.Color(153, 204, 0),   // hour
-        strip.Color(0, 159, 255),   // minute
-        strip.Color(0, 0, 255)     // second
+        strip.Color(51, 0, 51),   // marker
+        strip.Color(153, 204, 0), // hour
+        strip.Color(0, 159, 255), // minute
+        strip.Color(0, 0, 255)    // second
     },
     // Sunset - Orange markers, blue/teal hands
     {
-        strip.Color(255, 128, 0),  // marker
-        strip.Color(0, 128, 255),  // hour
-        strip.Color(0, 255, 255),  // minute
-        strip.Color(0, 128, 128)   // second
+        strip.Color(255, 128, 0), // marker
+        strip.Color(0, 128, 255), // hour
+        strip.Color(0, 255, 255), // minute
+        strip.Color(0, 128, 128)  // second
     },
     // Forest - Green markers, red/pink hands
     {
-        strip.Color(0, 128, 0),    // marker
-        strip.Color(255, 0, 0),    // hour
-        strip.Color(255, 0, 128),  // minute
-        strip.Color(128, 0, 64)    // second
+        strip.Color(0, 128, 0),   // marker
+        strip.Color(255, 0, 0),   // hour
+        strip.Color(255, 0, 128), // minute
+        strip.Color(128, 0, 64)   // second
     },
     // Ocean - Teal markers, orange/yellow hands
     {
-        strip.Color(0, 128, 128),  // marker
-        strip.Color(255, 128, 0),  // hour
-        strip.Color(255, 255, 0),  // minute
-        strip.Color(128, 128, 0)   // second
+        strip.Color(0, 128, 128), // marker
+        strip.Color(255, 128, 0), // hour
+        strip.Color(255, 255, 0), // minute
+        strip.Color(128, 128, 0)  // second
     },
     // Royal - Gold markers, purple/blue hands
     {
-        strip.Color(255, 215, 0),  // marker
-        strip.Color(128, 0, 255),  // hour
-        strip.Color(0, 0, 255),    // minute
-        strip.Color(64, 0, 128)    // second
+        strip.Color(255, 215, 0), // marker
+        strip.Color(128, 0, 255), // hour
+        strip.Color(0, 0, 255),   // minute
+        strip.Color(64, 0, 128)   // second
     },
     // Neon - Pink markers, cyan/green hands
     {
-        strip.Color(255, 0, 255),  // marker
-        strip.Color(0, 255, 255),  // hour
-        strip.Color(0, 255, 128),  // minute
-        strip.Color(0, 128, 255)   // second
+        strip.Color(255, 0, 255), // marker
+        strip.Color(0, 255, 255), // hour
+        strip.Color(0, 255, 128), // minute
+        strip.Color(0, 128, 255)  // second
     },
     // Autumn - Brown markers, sky blue/light blue hands
     {
-        strip.Color(139, 69, 19),  // marker
-        strip.Color(135, 206, 235),// hour
-        strip.Color(173, 216, 230),// minute
-        strip.Color(176, 224, 230) // second
+        strip.Color(139, 69, 19),   // marker
+        strip.Color(135, 206, 235), // hour
+        strip.Color(173, 216, 230), // minute
+        strip.Color(176, 224, 230)  // second
     },
     // Winter - Silver markers, deep blue/light blue hands
     {
-        strip.Color(192, 192, 192),// marker
-        strip.Color(0, 0, 139),    // hour
-        strip.Color(0, 0, 205),    // minute
-        strip.Color(0, 0, 255)     // second
+        strip.Color(192, 192, 192), // marker
+        strip.Color(0, 0, 139),     // hour
+        strip.Color(0, 0, 205),     // minute
+        strip.Color(0, 0, 255)      // second
     },
     // Fire - Red markers, orange/yellow hands
     {
-        strip.Color(255, 0, 0),    // marker
-        strip.Color(255, 128, 0),  // hour
-        strip.Color(255, 255, 0),  // minute
-        strip.Color(255, 200, 0)   // second
+        strip.Color(255, 0, 0),   // marker
+        strip.Color(255, 128, 0), // hour
+        strip.Color(255, 255, 0), // minute
+        strip.Color(255, 200, 0)  // second
     },
     // Mint - Mint markers, teal/blue hands
     {
-        strip.Color(152, 255, 152),// marker
-        strip.Color(0, 128, 128),  // hour
-        strip.Color(0, 0, 255),    // minute
-        strip.Color(0, 64, 128)    // second
+        strip.Color(152, 255, 152), // marker
+        strip.Color(0, 128, 128),   // hour
+        strip.Color(0, 0, 255),     // minute
+        strip.Color(0, 64, 128)     // second
     },
     // Lavender - Purple markers, pink/red hands
     {
-        strip.Color(230, 230, 250),// marker
-        strip.Color(255, 192, 203),// hour
-        strip.Color(255, 0, 0),    // minute
-        strip.Color(128, 0, 0)     // second
-    }
-};
+        strip.Color(230, 230, 250), // marker
+        strip.Color(255, 192, 203), // hour
+        strip.Color(255, 0, 0),     // minute
+        strip.Color(128, 0, 0)      // second
+    }};
 
 const uint8_t brightnessLevels[] = {
-    20,    // Level 0: Night mode
-    40,    // Level 1: Very dim
-    60,    // Level 2: Dim
-    102,   // Level 4: Medium-low
-    153,   // Level 5: Medium
-    200    // Level 7: Full brightness 
+    20,  // Level 0: Night mode
+    40,  // Level 1: Very dim
+    60,  // Level 2: Dim
+    102, // Level 4: Medium-low
+    153, // Level 5: Medium
+    200  // Level 7: Full brightness
 };
 
 uint8_t BUTTON_PINS[] = {HOUR_BUTTON, MINUTE_BUTTON, BRIGHTNESS_BUTTON, MODE_BUTTON};
@@ -284,7 +316,8 @@ uint8_t currentColorScheme = 0;
 uint8_t currentMode = MODE_HANDS_WITH_FIFTHS;
 boolean modeChanged = false;
 
-enum SettingMode {
+enum SettingMode
+{
     SETTING_BRIGHTNESS,
     SETTING_MODE,
     SETTING_COLOR_SCHEME
@@ -292,7 +325,8 @@ enum SettingMode {
 
 SettingMode currentSettingMode = SETTING_BRIGHTNESS;
 
-void resetToDefaults() {
+void resetToDefaults()
+{
     currentBrightnessLevel = DEFAULT_BRIGHTNESS_LEVEL;
     currentMode = MODE_HANDS_WITH_FIFTHS;
     currentColorScheme = 0;
@@ -301,7 +335,8 @@ void resetToDefaults() {
     saveSettings();
 }
 
-void setup() {
+void setup()
+{
     strip.begin();
     ledStrip.begin();
     clearStrip();
@@ -309,211 +344,247 @@ void setup() {
 
     pinMode(COMMON_GROUND, OUTPUT);
     digitalWrite(COMMON_GROUND, LOW);
-    
-    for(uint8_t i = 0; i < 4; i++) {
+
+    for (uint8_t i = 0; i < 4; i++)
+    {
         pinMode(BUTTON_PINS[i], INPUT_PULLUP);
     }
-    
+
     uint8_t storedBrightness = EEPROM.read(EEPROM_BRIGHTNESS_ADDR);
-    if(storedBrightness < sizeof(brightnessLevels)/sizeof(brightnessLevels[0])) {
+    if (storedBrightness < sizeof(brightnessLevels) / sizeof(brightnessLevels[0]))
+    {
         currentBrightnessLevel = storedBrightness;
-    } else {
+    }
+    else
+    {
         currentBrightnessLevel = DEFAULT_BRIGHTNESS_LEVEL;
         EEPROM.write(EEPROM_BRIGHTNESS_ADDR, currentBrightnessLevel);
     }
-    
+
     uint8_t storedMode = EEPROM.read(EEPROM_MODE_ADDR);
-    if(storedMode < MODES_PER_SCHEME) {
+    if (storedMode < MODES_PER_SCHEME)
+    {
         currentMode = storedMode;
-    } else {
+    }
+    else
+    {
         currentMode = MODE_HANDS_WITH_FIFTHS;
         EEPROM.write(EEPROM_MODE_ADDR, currentMode);
     }
 
     uint8_t storedColorScheme = EEPROM.read(EEPROM_COLOR_SCHEME_ADDR);
-    if(storedColorScheme < COLOR_SCHEME_COUNT) {
+    if (storedColorScheme < COLOR_SCHEME_COUNT)
+    {
         currentColorScheme = storedColorScheme;
-    } else {
+    }
+    else
+    {
         currentColorScheme = 0;
         EEPROM.write(EEPROM_COLOR_SCHEME_ADDR, currentColorScheme);
     }
-    
+
     ledStrip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
-    for(int i = 0; i < PIXELS; i++) {
+    for (int i = 0; i < PIXELS; i++)
+    {
         ledStrip.setPixelColor(i, strip.Color(51, 0, 51));
         ledStrip.show();
         delayAndCheckButtons(5);
     }
-    for(int i = 0; i < PIXELS; i++) {
+    for (int i = 0; i < PIXELS; i++)
+    {
         ledStrip.setPixelColor(i, OFF_COLOR);
         ledStrip.show();
         delayAndCheckButtons(5);
     }
-    
+
     runRTCDiagnostics();
-    
-    for(uint8_t i = 0; i < 4; i++) {
-        if(digitalRead(BUTTON_PINS[i]) != HIGH) {
+
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        if (digitalRead(BUTTON_PINS[i]) != HIGH)
+        {
             ledStrip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
-            for(int j = 0; j < PIXELS; j++) {
+            for (int j = 0; j < PIXELS; j++)
+            {
                 ledStrip.setPixelColor(j, BUTTON_ERROR_COLOR);
             }
             ledStrip.show();
             delayAndCheckButtons(100);
-            for(int i = 0; i < PIXELS; i++) {
+            for (int i = 0; i < PIXELS; i++)
+            {
                 ledStrip.setPixelColor(i, OFF_COLOR);
             }
             ledStrip.show();
         }
     }
-    
-    if(!rtcWorking) {
+
+    if (!rtcWorking)
+    {
         Debug.println("RTC not working, using fallback time");
         fallbackHour = 12;
         fallbackMinute = 0;
         fallbackSecond = 0;
         now = DateTime(2020, 1, 1, fallbackHour, fallbackMinute, fallbackSecond);
         previousReading = now;
-    } else {
-        Debug.println("RTC initialized successfully");
+    }
+    else
+    {
         now = RTC.now();
         previousReading = now;
     }
-    
+
     lastSecondMillis = millis();
-    
+
     updateBrightness();
     renderClockFace();
 }
 
-void runRTCDiagnostics() {
+void runRTCDiagnostics()
+{
     Wire.begin();
     delay(100);
-    
+
+    Wire.setClock(10000);
+    delay(100);
+
     byte error, address;
     int deviceCount = 0;
-    
-    for(address = 1; address < 127; address++) {
-        Wire.beginTransmission(address);
-        error = Wire.endTransmission();
-        
-        if(error == 0) {
-            deviceCount++;
+
+    for (int scan = 0; scan < 2; scan++)
+    {
+        for (address = 1; address < 127; address++)
+        {
+            Wire.beginTransmission(address);
+            error = Wire.endTransmission();
+
+            if (error == 0)
+            {
+                deviceCount++;
+            }
         }
+        if (deviceCount > 0)
+            break;
+        delay(100);
     }
-    
-    if(deviceCount == 0) {
+
+    if (deviceCount == 0)
+    {
         Debug.println("No I2C devices found!");
         showDiagnosticPattern(I2C_ERROR_COLOR);
         rtcWorking = false;
         return;
     }
-    
-    if(!RTC.begin()) {
+
+    Wire.setClock(100000);
+    delay(100);
+
+    if (!RTC.begin())
+    {
         Debug.println("RTC initialization failed!");
         showDiagnosticPattern(RTC_ERROR_COLOR);
         rtcWorking = false;
         return;
     }
-    
+
     Wire.beginTransmission(0x68);
     Wire.write(0x00);
     Wire.endTransmission();
-    
+
     Wire.requestFrom(0x68, 1);
-    if(Wire.available()) {
+    if (Wire.available())
+    {
         byte reg0 = Wire.read();
-        if(reg0 & 0x80) {
-            Debug.println("RTC stopped, adjusting time...");
+        if (reg0 & 0x80)
+        {
             RTC.adjust(DateTime(__DATE__, __TIME__));
         }
     }
-    
-    showDiagnosticPattern(SUCCESS_COLOR);
+
     rtcWorking = true;
 }
 
-void showDiagnosticResult(bool success, String message) {
-    for(int i = 0; i < PIXELS; i++) {
-        strip.setPixelColor(i, OFF_COLOR);
-    }
-    strip.show();
-    delay(250);
-    
-    if(success) {
-        for(int i = 0; i < PIXELS; i += 3) {
-            strip.setPixelColor(i, SUCCESS_COLOR);
-        }
-    } else {
-        for(int i = 0; i < PIXELS; i++) {
-            strip.setPixelColor(i, ERROR_COLOR);
-        }
-    }
-    strip.show();
-    delay(1000);
-}
-
-void showDiagnosticPattern(uint32_t color) {
+void showDiagnosticPattern(uint32_t color)
+{
     static bool rtcErrorShown = false;
     uint8_t oldBrightness = strip.getBrightness();
     strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
 
     Debug.print("Showing diagnostic pattern: ");
-    if(color == ERROR_COLOR) Debug.println("ERROR");
-    else if(color == I2C_ERROR_COLOR) Debug.println("I2C ERROR");
-    else if(color == RTC_ERROR_COLOR) Debug.println("RTC ERROR");
-    else if(color == WARNING_COLOR) Debug.println("WARNING");
-    else Debug.println("SUCCESS");
-    
-    for(int i = 0; i < PIXELS; i++) {
+    if (color == ERROR_COLOR)
+        Debug.println("ERROR");
+    else if (color == I2C_ERROR_COLOR)
+        Debug.println("I2C ERROR");
+    else if (color == RTC_ERROR_COLOR)
+        Debug.println("RTC ERROR");
+    else if (color == WARNING_COLOR)
+        Debug.println("WARNING");
+
+    for (int i = 0; i < PIXELS; i++)
+    {
         strip.setPixelColor(i, OFF_COLOR);
     }
     strip.show();
     delay(250);
 
-    if(color == ERROR_COLOR) {
-        for(int j = 0; j < 3; j++) {
-            for(int i = 0; i < PIXELS; i++) {
+    if (color == ERROR_COLOR)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            for (int i = 0; i < PIXELS; i++)
+            {
                 strip.setPixelColor(i, (i % 2 == 0) ? ERROR_COLOR : OFF_COLOR);
             }
             strip.show();
             delay(250);
-            for(int i = 0; i < PIXELS; i++) {
+            for (int i = 0; i < PIXELS; i++)
+            {
                 strip.setPixelColor(i, (i % 2 == 1) ? ERROR_COLOR : OFF_COLOR);
             }
             strip.show();
             delay(250);
         }
-    } else if(color == I2C_ERROR_COLOR) {
-        for(int i = 0; i < PIXELS; i++) {
+    }
+    else if (color == I2C_ERROR_COLOR)
+    {
+        for (int i = 0; i < PIXELS; i++)
+        {
             strip.setPixelColor(i, OFF_COLOR);
             strip.setPixelColor((i + 1) % PIXELS, I2C_ERROR_COLOR);
             strip.show();
             delay(20);
         }
-    } else if(color == RTC_ERROR_COLOR && !rtcErrorShown) {
+    }
+    else if (color == RTC_ERROR_COLOR && !rtcErrorShown)
+    {
         rtcErrorShown = true;
-        for(int i = 0; i < PIXELS; i++) {
+        for (int i = 0; i < PIXELS; i++)
+        {
             strip.setPixelColor(i, OFF_COLOR);
         }
         strip.show();
         delay(250);
-        
-        for(int i = 0; i < PIXELS; i++) {
+
+        for (int i = 0; i < PIXELS; i++)
+        {
             strip.setPixelColor(i, OFF_COLOR);
             strip.setPixelColor((i + 1) % PIXELS, RTC_ERROR_COLOR);
             strip.show();
             delay(20);
         }
-        
-        for(int i = 0; i < PIXELS; i++) {
+
+        for (int i = 0; i < PIXELS; i++)
+        {
             strip.setPixelColor(i, OFF_COLOR);
         }
         strip.show();
         delay(250);
-    } else if(color == WARNING_COLOR) {
-        for(int j = 0; j < 3; j++) {
-            for(int i = 0; i < PIXELS; i++) {
+    }
+    else if (color == WARNING_COLOR)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            for (int i = 0; i < PIXELS; i++)
+            {
                 strip.setPixelColor(i, OFF_COLOR);
                 strip.setPixelColor((i + 1) % PIXELS, WARNING_COLOR);
                 strip.setPixelColor((i + 2) % PIXELS, WARNING_COLOR);
@@ -521,63 +592,49 @@ void showDiagnosticPattern(uint32_t color) {
                 delay(2);
             }
         }
-    } else if(color == SUCCESS_COLOR) {
-        rtcErrorShown = false;
-        for(int j = 0; j < 2; j++) {
-            for(int i = 0; i < PIXELS; i++) {
-                strip.setPixelColor(i, OFF_COLOR);
-            }
-            strip.show();
-            delay(100);
-            
-            for(int i = 0; i < PIXELS; i += 3) {
-                strip.setPixelColor(i, SUCCESS_COLOR);
-            }
-            strip.show();
-            delay(100);
-            
-            for(int i = 0; i < PIXELS; i++) {
-                strip.setPixelColor(i, OFF_COLOR);
-            }
-            strip.show();
-            delay(100);
-        }
     }
-    
+
     strip.setBrightness(oldBrightness);
 }
 
-void checkRTCStatus() {
+void checkRTCStatus()
+{
     static uint8_t failCount = 0;
-    
-    if(millis() - lastCheck > 10000) {
+
+    if (millis() - lastCheck > 10000)
+    {
         lastCheck = millis();
-        
-        if(rtcWorking) {
+
+        if (rtcWorking)
+        {
             DateTime current = RTC.now();
-            
-            boolean timeChanged = (current.second() != previousReading.second()) || 
-                               (current.minute() != previousReading.minute());
-                               
-            boolean validTime = (current.year() >= 2000) && 
-                            (current.month() >= 1 && current.month() <= 12) &&
-                            (current.day() >= 1 && current.day() <= 31);
-            
-            if(!timeChanged || !validTime) {
+
+            boolean timeChanged = (current.second() != previousReading.second()) ||
+                                  (current.minute() != previousReading.minute());
+
+            boolean validTime = (current.year() >= 2000) &&
+                                (current.month() >= 1 && current.month() <= 12) &&
+                                (current.day() >= 1 && current.day() <= 31);
+
+            if (!timeChanged || !validTime)
+            {
                 failCount++;
-                
-                if(failCount >= 3) {
+
+                if (failCount >= 3)
+                {
                     rtcWorking = false;
                     Debug.println("RTC failed after multiple attempts");
-                    
+
                     fallbackHour = previousReading.hour();
                     fallbackMinute = previousReading.minute();
                     fallbackSecond = previousReading.second();
                     lastSecondMillis = millis();
-                    
+
                     showDiagnosticPattern(ERROR_COLOR);
                 }
-            } else {
+            }
+            else
+            {
                 failCount = 0;
                 previousReading = current;
             }
@@ -585,19 +642,24 @@ void checkRTCStatus() {
     }
 }
 
-void delayAndCheckButtons(uint16_t time) {
-    while(time > 20) {
+void delayAndCheckButtons(uint16_t time)
+{
+    while (time > 20)
+    {
         checkNeedToPerformAction();
         delay(20);
-        time-=20;
+        time -= 20;
     }
     checkNeedToPerformAction();
     delay(time);
 }
 
-void checkNeedToPerformAction() {
-    if(digitalRead(HOUR_BUTTON) == LOW && digitalRead(BRIGHTNESS_BUTTON) == LOW) {
-        if(millis() - lastClearTime >= SETTING_RATE_LIMIT) {
+void checkNeedToPerformAction()
+{
+    if (digitalRead(HOUR_BUTTON) == LOW && digitalRead(BRIGHTNESS_BUTTON) == LOW)
+    {
+        if (millis() - lastClearTime >= SETTING_RATE_LIMIT)
+        {
             clearEEPROM();
             resetToDefaults();
             lastClearTime = millis();
@@ -605,8 +667,10 @@ void checkNeedToPerformAction() {
         return;
     }
 
-    if(digitalRead(MODE_BUTTON) == LOW) {
-        if(millis() - lastActionTime[2] >= 50) {
+    if (digitalRead(MODE_BUTTON) == LOW)
+    {
+        if (millis() - lastActionTime[2] >= 50)
+        {
             currentSettingMode = (SettingMode)((currentSettingMode + 1) % 3);
             showSettingIndicator(currentSettingMode);
             lastActionTime[2] = millis();
@@ -614,110 +678,134 @@ void checkNeedToPerformAction() {
         return;
     }
 
-    if(digitalRead(BRIGHTNESS_BUTTON) == LOW) {
-        if(millis() - lastActionTime[3] >= SETTING_RATE_LIMIT) {
-            switch(currentSettingMode) {
-                case SETTING_BRIGHTNESS:
-                    currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels)/sizeof(brightnessLevels[0]));
-                    updateBrightness();
-                    brightnessChanged = true;
-                    saveSettings();
-                    break;
-                    
-                case SETTING_MODE:
-                    currentMode = (currentMode + 1) % MODES_PER_SCHEME;
-                    modeChanged = true;
-                    saveSettings();
-                    renderClockFace();
-                    break;
-                    
-                case SETTING_COLOR_SCHEME:
-                    currentColorScheme = (currentColorScheme + 1) % COLOR_SCHEME_COUNT;
-                    EEPROM.write(EEPROM_COLOR_SCHEME_ADDR, currentColorScheme);
-                    renderClockFace();
-                    break;
+    if (digitalRead(BRIGHTNESS_BUTTON) == LOW)
+    {
+        if (millis() - lastActionTime[3] >= SETTING_RATE_LIMIT)
+        {
+            switch (currentSettingMode)
+            {
+            case SETTING_BRIGHTNESS:
+                currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels) / sizeof(brightnessLevels[0]));
+                updateBrightness();
+                brightnessChanged = true;
+                saveSettings();
+                break;
+
+            case SETTING_MODE:
+                currentMode = (currentMode + 1) % MODES_PER_SCHEME;
+                modeChanged = true;
+                saveSettings();
+                renderClockFace();
+                break;
+
+            case SETTING_COLOR_SCHEME:
+                currentColorScheme = (currentColorScheme + 1) % COLOR_SCHEME_COUNT;
+                EEPROM.write(EEPROM_COLOR_SCHEME_ADDR, currentColorScheme);
+                renderClockFace();
+                break;
             }
             lastActionTime[3] = millis();
         }
         return;
     }
 
-    for(uint8_t i = 0; i < 2; i++) {
+    for (uint8_t i = 0; i < 2; i++)
+    {
         int reading = digitalRead(BUTTON_PINS[i]);
-        
-        if(reading == LOW) {
+
+        if (reading == LOW)
+        {
             unsigned long rateLimit = (i == 0) ? HOUR_RATE_LIMIT : MINUTE_RATE_LIMIT;
-            
-            if(millis() - lastActionTime[i] >= rateLimit) {
+
+            if (millis() - lastActionTime[i] >= rateLimit)
+            {
                 performAction(BUTTON_PINS[i]);
                 lastActionTime[i] = millis();
             }
         }
-        
+
         lastButtonState[i] = reading;
     }
 }
 
-void performAction(uint8_t buttonPin) {
-    if(rtcWorking) {
+void performAction(uint8_t buttonPin)
+{
+    if (rtcWorking)
+    {
         DateTime oldTime = now;
-        
-        if(buttonPin == HOUR_BUTTON) {
+
+        if (buttonPin == HOUR_BUTTON)
+        {
             uint8_t hour = now.hour() + 1;
-            if(hour >= 24) hour = 0;
-            now = DateTime(now.year(), now.month(), now.day(), hour, 
-                now.minute(), now.second());
+            if (hour >= 24)
+                hour = 0;
+            now = DateTime(now.year(), now.month(), now.day(), hour,
+                           now.minute(), now.second());
         }
-        else if(buttonPin == MINUTE_BUTTON) {
+        else if (buttonPin == MINUTE_BUTTON)
+        {
             uint8_t minute = now.minute() + 1;
-            if(minute > 59) minute = 0;
-            now = DateTime(now.year(), now.month(), now.day(), now.hour(), 
-                minute, now.second());
+            if (minute > 59)
+                minute = 0;
+            now = DateTime(now.year(), now.month(), now.day(), now.hour(),
+                           minute, now.second());
         }
-        else if(buttonPin == BRIGHTNESS_BUTTON) {
-            currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels)/sizeof(brightnessLevels[0]));
+        else if (buttonPin == BRIGHTNESS_BUTTON)
+        {
+            currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels) / sizeof(brightnessLevels[0]));
             updateBrightness();
             brightnessChanged = true;
             saveSettings();
         }
-        else if(buttonPin == MODE_BUTTON) {
+        else if (buttonPin == MODE_BUTTON)
+        {
             currentMode = (currentMode + 1) % MODES_PER_SCHEME;
             modeChanged = true;
             saveSettings();
         }
-        
-        if(buttonPin == HOUR_BUTTON || buttonPin == MINUTE_BUTTON) {
+
+        if (buttonPin == HOUR_BUTTON || buttonPin == MINUTE_BUTTON)
+        {
             RTC.adjust(now);
             delay(10);
-            
+
             DateTime verify = RTC.now();
-            if(verify.hour() != now.hour() || verify.minute() != now.minute()) {
+            if (verify.hour() != now.hour() || verify.minute() != now.minute())
+            {
                 Debug.println("RTC adjustment failed!");
                 showDiagnosticPattern(ERROR_COLOR);
                 now = oldTime;
             }
         }
-    } else {
-        if(buttonPin == HOUR_BUTTON) {
+    }
+    else
+    {
+        if (buttonPin == HOUR_BUTTON)
+        {
             fallbackHour++;
-            if(fallbackHour >= 24) fallbackHour = 0;
+            if (fallbackHour >= 24)
+                fallbackHour = 0;
         }
-        else if(buttonPin == MINUTE_BUTTON) {
+        else if (buttonPin == MINUTE_BUTTON)
+        {
             fallbackMinute++;
-            if(fallbackMinute >= 60) fallbackMinute = 0;
+            if (fallbackMinute >= 60)
+                fallbackMinute = 0;
         }
-        else if(buttonPin == BRIGHTNESS_BUTTON) {
-            currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels)/sizeof(brightnessLevels[0]));
+        else if (buttonPin == BRIGHTNESS_BUTTON)
+        {
+            currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels) / sizeof(brightnessLevels[0]));
             updateBrightness();
             brightnessChanged = true;
             saveSettings();
         }
-        else if(buttonPin == MODE_BUTTON) {
+        else if (buttonPin == MODE_BUTTON)
+        {
             currentMode = (currentMode + 1) % MODES_PER_SCHEME;
             modeChanged = true;
             saveSettings();
         }
-        
+
         now = DateTime(2020, 1, 1, fallbackHour, fallbackMinute, fallbackSecond);
     }
 
@@ -727,83 +815,100 @@ void performAction(uint8_t buttonPin) {
     delay(100);
 }
 
-void updateFallbackTime() {
+void updateFallbackTime()
+{
     unsigned long currentMillis = millis();
-    
-    if(currentMillis - lastSecondMillis >= 1000) {
+
+    if (currentMillis - lastSecondMillis >= 1000)
+    {
         lastSecondMillis = currentMillis;
         fallbackSecond++;
-        
-        if(fallbackSecond >= 60) {
+
+        if (fallbackSecond >= 60)
+        {
             fallbackSecond = 0;
             fallbackMinute++;
-            
-            if(fallbackMinute >= 60) {
+
+            if (fallbackMinute >= 60)
+            {
                 fallbackMinute = 0;
                 fallbackHour++;
-                
-                if(fallbackHour >= 24) {
+
+                if (fallbackHour >= 24)
+                {
                     fallbackHour = 0;
                 }
             }
         }
-        
+
         now = DateTime(2020, 1, 1, fallbackHour, fallbackMinute, fallbackSecond);
     }
 }
 
-void updateBrightness() {
+void updateBrightness()
+{
     strip.setBrightness(brightnessLevels[currentBrightnessLevel]);
     renderClockFace();
 }
 
-void saveSettings() {
-    if(brightnessChanged) {
+void saveSettings()
+{
+    if (brightnessChanged)
+    {
         EEPROM.write(EEPROM_BRIGHTNESS_ADDR, currentBrightnessLevel);
         brightnessChanged = false;
     }
-    if(modeChanged) {
+    if (modeChanged)
+    {
         EEPROM.write(EEPROM_MODE_ADDR, currentMode);
         modeChanged = false;
     }
 }
 
-void clearStrip() {
+void clearStrip()
+{
     ledStrip.clear();
 }
 
-void renderClockFace() {
+void renderClockFace()
+{
     clearStrip();
-    
-    const ColorScheme& scheme = colorSchemes[currentColorScheme];
-    
+
+    const ColorScheme &scheme = colorSchemes[currentColorScheme];
+
     // Draw clock face first (lowest priority)
-    if(currentMode == MODE_HANDS_WITH_FIFTHS || currentMode == MODE_HANDS_WITH_ALL_MARKERS) {
-        for(int i = 0; i < 60; i += 5) {
+    if (currentMode == MODE_HANDS_WITH_FIFTHS || currentMode == MODE_HANDS_WITH_ALL_MARKERS)
+    {
+        for (int i = 0; i < 60; i += 5)
+        {
             ledStrip.setPixelColor(i, scheme.markerColor);
         }
     }
-    
-    if(currentMode == MODE_HANDS_WITH_ALL_MARKERS) {
+
+    if (currentMode == MODE_HANDS_WITH_ALL_MARKERS)
+    {
         uint8_t r = ((uint32_t)scheme.markerColor >> 16 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t g = ((uint32_t)scheme.markerColor >> 8 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t b = ((uint32_t)scheme.markerColor & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint32_t MINUTE_MARKER_COLOR = strip.Color(r, g, b);
 
-        for(int i = 0; i < 60; i++) {
-            if(i % 5 != 0) {
+        for (int i = 0; i < 60; i++)
+        {
+            if (i % 5 != 0)
+            {
                 ledStrip.setPixelColor(i, MINUTE_MARKER_COLOR);
             }
         }
     }
-    
+
     // Draw minute hand (medium priority)
     uint8_t minutes = now.minute();
     float percent = minutes / 60.0;
     minutes = forward(minutes, ROTATE * 5);
     uint8_t start = minutes;
 
-    for(volatile uint8_t i = 0; i < MINUTE_LED_COUNT; i++) {
+    for (volatile uint8_t i = 0; i < MINUTE_LED_COUNT; i++)
+    {
         ledStrip.setPixelColor(minutes, scheme.minuteColor);
         minutes = seekBackward(start, i + 1);
     }
@@ -815,26 +920,30 @@ void renderClockFace() {
     hours += (uint8_t)(5.0 * hourPercent);
     start = hours;
 
-    for(volatile uint8_t i = 0; i < HOUR_LED_COUNT; i++) { 
+    for (volatile uint8_t i = 0; i < HOUR_LED_COUNT; i++)
+    {
         ledStrip.setPixelColor(hours, scheme.hourColor);
-        hours = seekBackward(start, i + 1); 
+        hours = seekBackward(start, i + 1);
     }
 
     ledStrip.show();
 }
 
-void animateSecond(uint8_t start, uint8_t count, uint8_t _end) {
+void animateSecond(uint8_t start, uint8_t count, uint8_t _end)
+{
     uint8_t add = (float)_end / count;
     uint8_t brightness = add;
     uint16_t _delay = (500 / count) - 1;
 
-    while(count > 0) {
+    while (count > 0)
+    {
         uint8_t led = seekBackward(start, count);
         uint32_t color = strip.Color(brightness, 0, brightness / 2);
         ledStrip.setPixelColor(led, color, false);
         ledStrip.show();
         delayAndCheckButtons(_delay);
-        if(count > 1) {
+        if (count > 1)
+        {
             ledStrip.setPixelColor(led, ledStrip.getPixelHistory(led), false);
             ledStrip.show();
         }
@@ -843,33 +952,42 @@ void animateSecond(uint8_t start, uint8_t count, uint8_t _end) {
     }
 }
 
-uint8_t forward(uint8_t value, uint8_t steps) {
+uint8_t forward(uint8_t value, uint8_t steps)
+{
     return (value + steps) % 60;
 }
 
-uint8_t seekBackward(uint8_t pos_, uint8_t count) {
-    int8_t pos = pos_; 
+uint8_t seekBackward(uint8_t pos_, uint8_t count)
+{
+    int8_t pos = pos_;
     pos -= count % PIXELS;
-    if(pos < 0) pos += 60;
+    if (pos < 0)
+        pos += 60;
     return pos;
 }
 
-void loop() {
+void loop()
+{
     checkRTCStatus();
-    
-    if(rtcWorking) {
-        now = RTC.now();  
 
-        if(syncLoop) {
+    if (rtcWorking)
+    {
+        now = RTC.now();
+
+        if (syncLoop)
+        {
             uint8_t start = now.second();
-            while(now.second() == start) {
+            while (now.second() == start)
+            {
                 now = RTC.now();
                 checkNeedToPerformAction();
             }
             syncLoop = false;
             loopCount = 0;
         }
-    } else {
+    }
+    else
+    {
         updateFallbackTime();
     }
 
@@ -877,91 +995,110 @@ void loop() {
     renderClockFace();
 
     bool anyButtonPressed = false;
-    for(uint8_t i = 0; i < 4; i++) {
-        if(digitalRead(BUTTON_PINS[i]) == LOW) {
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        if (digitalRead(BUTTON_PINS[i]) == LOW)
+        {
             anyButtonPressed = true;
             break;
         }
     }
 
-    if(!anyButtonPressed) {
+    if (!anyButtonPressed)
+    {
         uint8_t seconds = now.second();
         seconds = forward(seconds, ROTATE * 5);
         animateSecond(seconds, SECOND_LED_COUNT, MAX_BRIGHTNESS);
     }
-    
+
     delayAndCheckButtons(500);
 
     saveSettings();
 
     loopCount++;
-    if(loopCount >= SYNC_MAX) {
+    if (loopCount >= SYNC_MAX)
+    {
         syncLoop = true;
     }
 }
 
-void clearEEPROM() {
-    for(int i = 0; i < 10; i++) {
+void clearEEPROM()
+{
+    for (int i = 0; i < 10; i++)
+    {
         EEPROM.write(i, 0);
     }
-    
-    for(int i = 0; i < PIXELS; i++) {
+
+    for (int i = 0; i < PIXELS; i++)
+    {
         strip.setPixelColor(i, strip.Color(64, 0, 0));
     }
     strip.show();
     delay(800);
-    
+
     clearStrip();
     strip.show();
     delay(700);
 }
 
-void showSettingIndicator(SettingMode kind) {
+void showSettingIndicator(SettingMode kind)
+{
     clearStrip();
-    
-    switch(kind) {
-        case SETTING_BRIGHTNESS:
-            for(int i = 0; i < PIXELS; i++) {
-                uint8_t brightness = (i * 255) / (PIXELS / 4);
-                if(brightness > 255) brightness = 255;
-                strip.setPixelColor(i, strip.Color(brightness, brightness, 0));
+
+    switch (kind)
+    {
+    case SETTING_BRIGHTNESS:
+        for (int i = 0; i < PIXELS; i++)
+        {
+            uint8_t brightness = (i * 255) / (PIXELS / 4);
+            if (brightness > 255)
+                brightness = 255;
+            strip.setPixelColor(i, strip.Color(brightness, brightness, 0));
+        }
+        break;
+
+    case SETTING_MODE:
+        for (int i = 0; i < PIXELS; i++)
+        {
+            if (i % 10 < 5)
+            {
+                strip.setPixelColor(i, strip.Color(0, 255, 0));
             }
-            break;
-            
-        case SETTING_MODE:
-            for(int i = 0; i < PIXELS; i++) {
-                if(i % 10 < 5) {
-                    strip.setPixelColor(i, strip.Color(0, 255, 0));
-                }
+        }
+        break;
+
+    case SETTING_COLOR_SCHEME:
+        for (int i = 0; i < PIXELS; i++)
+        {
+            uint8_t hue = (i * 255) / PIXELS;
+            uint8_t r, g, b;
+
+            if (hue < 85)
+            {
+                r = hue * 3;
+                g = 255 - hue * 3;
+                b = 0;
             }
-            break;
-            
-        case SETTING_COLOR_SCHEME:
-            for(int i = 0; i < PIXELS; i++) {
-                uint8_t hue = (i * 255) / PIXELS;
-                uint8_t r, g, b;
-                
-                if(hue < 85) {
-                    r = hue * 3;
-                    g = 255 - hue * 3;
-                    b = 0;
-                } else if(hue < 170) {
-                    hue -= 85;
-                    r = 255 - hue * 3;
-                    g = 0;
-                    b = hue * 3;
-                } else {
-                    hue -= 170;
-                    r = 0;
-                    g = hue * 3;
-                    b = 255 - hue * 3;
-                }
-                
-                strip.setPixelColor(i, strip.Color(r, g, b));
+            else if (hue < 170)
+            {
+                hue -= 85;
+                r = 255 - hue * 3;
+                g = 0;
+                b = hue * 3;
             }
-            break;
+            else
+            {
+                hue -= 170;
+                r = 0;
+                g = hue * 3;
+                b = 255 - hue * 3;
+            }
+
+            strip.setPixelColor(i, strip.Color(r, g, b));
+        }
+        break;
     }
-    
+
     strip.show();
     delay(500);
     renderClockFace();
