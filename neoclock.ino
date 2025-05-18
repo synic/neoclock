@@ -1,4 +1,34 @@
-#include <Adafruit_NeoPixel.h>
+#define PIXELS 60
+#define NEOPIXEL_PIN 9
+#define BRIGHTNESS_LEVELS 5
+#define DEFAULT_BRIGHTNESS_LEVEL 3
+#define EEPROM_BRIGHTNESS_ADDR 0
+#define EEPROM_MODE_ADDR 1
+#define EEPROM_COLOR_SCHEME_ADDR 2
+#define MINUTE_RATE_LIMIT 20
+#define HOUR_RATE_LIMIT 100
+#define SETTING_RATE_LIMIT 500
+#define INDICATOR_DURATION 700
+#define MAX_BRIGHTNESS 200
+#define SYNC_MAX 3600
+#define DIAGNOSTIC_BRIGHTNESS 90
+#define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
+#define COMMON_GROUND 0
+#define HOUR_BUTTON 2
+#define MINUTE_BUTTON 1
+#define BRIGHTNESS_BUTTON 3
+#define MODE_BUTTON 4
+#define ROTATE 0
+#define COLOR_SCHEME_COUNT 11
+#define MODES_PER_SCHEME 3
+#define MODE_HANDS_ONLY 0
+#define MODE_HANDS_WITH_FIFTHS 1
+#define MODE_HANDS_WITH_ALL_MARKERS 2
+#define MINUTE_LED_COUNT 2
+#define HOUR_LED_COUNT 1
+#define SECOND_LED_COUNT 18
+
+#include <FastLED.h>
 #include <Wire.h>
 #include <RTClib.h>
 #include <EEPROM.h>
@@ -66,56 +96,60 @@ public:
 
 SerialWrapper Debug;
 
-class NeoPixelStrip
+class LEDStrip
 {
 private:
-    Adafruit_NeoPixel &strip;
-    uint32_t *pixelHistory;
+    CRGB *leds;
+    CRGB *pixelHistory;
     bool *pixelDirty;
     const uint16_t pixelCount;
+    uint8_t currentBrightness;
 
 public:
-    NeoPixelStrip(Adafruit_NeoPixel &_strip) : strip(_strip),
-                                               pixelCount(_strip.numPixels())
+    LEDStrip(uint16_t numPixels) : pixelCount(numPixels)
     {
-        pixelHistory = new uint32_t[pixelCount];
+        leds = new CRGB[pixelCount];
+        pixelHistory = new CRGB[pixelCount];
         pixelDirty = new bool[pixelCount];
+        currentBrightness = 255;
+
         for (uint16_t i = 0; i < pixelCount; i++)
         {
-            pixelHistory[i] = 0;
+            pixelHistory[i] = CRGB::Black;
             pixelDirty[i] = false;
         }
     }
 
-    ~NeoPixelStrip()
+    ~LEDStrip()
     {
+        delete[] leds;
         delete[] pixelHistory;
         delete[] pixelDirty;
     }
 
-    void setPixelColor(uint16_t n, uint32_t c, bool saveToHistory = true)
+    void setPixelColor(uint16_t n, CRGB color, bool saveToHistory = true)
     {
         if (saveToHistory)
         {
-            pixelHistory[n] = c;
+            pixelHistory[n] = color;
             pixelDirty[n] = true;
         }
-        strip.setPixelColor(n, c);
+        leds[n] = color;
     }
 
-    uint32_t getPixelColor(uint16_t n)
+    CRGB getPixelColor(uint16_t n)
     {
-        return strip.getPixelColor(n);
+        return leds[n];
     }
 
-    uint32_t getPixelHistory(uint16_t n)
+    CRGB getPixelHistory(uint16_t n)
     {
         return pixelHistory[n];
     }
 
     void show()
     {
-        strip.show();
+        FastLED.show();
     }
 
     void clear()
@@ -123,163 +157,139 @@ public:
         for (uint16_t i = 0; i < pixelCount; i++)
         {
             pixelDirty[i] = false;
-            pixelHistory[i] = 0;
+            pixelHistory[i] = CRGB::Black;
         }
-        strip.clear();
+        FastLED.clear();
     }
 
     void begin()
     {
-        strip.begin();
+        FastLED.setBrightness(currentBrightness);
     }
 
     void setBrightness(uint8_t b)
     {
-        strip.setBrightness(b);
+        currentBrightness = b;
+        FastLED.setBrightness(b);
     }
 
     uint8_t getBrightness()
     {
-        return strip.getBrightness();
+        return currentBrightness;
     }
 
     uint16_t numPixels()
     {
         return pixelCount;
     }
+
+    // Helper function to convert RGB values to CRGB
+    static CRGB Color(uint8_t r, uint8_t g, uint8_t b)
+    {
+        return CRGB(r, g, b);
+    }
+
+    CRGB *getLeds()
+    {
+        return leds;
+    }
 };
 
-#define PIXELS 60
-#define PIN 9
-#define BRIGHTNESS_LEVELS 5
-#define DEFAULT_BRIGHTNESS_LEVEL 3
-#define EEPROM_BRIGHTNESS_ADDR 0
-#define EEPROM_MODE_ADDR 1
-#define EEPROM_COLOR_SCHEME_ADDR 2
-#define MINUTE_RATE_LIMIT 20
-#define HOUR_RATE_LIMIT 100
-#define SETTING_RATE_LIMIT 500
-#define INDICATOR_DURATION 700
-#define MAX_BRIGHTNESS 200
-#define SYNC_MAX 3600
-#define DIAGNOSTIC_BRIGHTNESS 90
-#define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
-
-#define COMMON_GROUND 0
-#define HOUR_BUTTON 2
-#define MINUTE_BUTTON 1
-#define BRIGHTNESS_BUTTON 3
-#define MODE_BUTTON 4
-
-#define ROTATE 0
-
-#define COLOR_SCHEME_COUNT 11
-#define MODES_PER_SCHEME 3
-
-#define MODE_HANDS_ONLY 0
-#define MODE_HANDS_WITH_FIFTHS 1
-#define MODE_HANDS_WITH_ALL_MARKERS 2
-
-#define MINUTE_LED_COUNT 2
-#define HOUR_LED_COUNT 1
-#define SECOND_LED_COUNT 18
-
-Adafruit_NeoPixel wrappedStrip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ800);
-NeoPixelStrip strip(wrappedStrip);
+LEDStrip strip(PIXELS);
 RTC_DS3231 RTC;
 
-uint32_t OFF_COLOR = wrappedStrip.Color(0, 0, 0);
-uint32_t ERROR_COLOR = wrappedStrip.Color(255, 32, 32);
-uint32_t I2C_ERROR_COLOR = wrappedStrip.Color(0, 255, 128);
-uint32_t BUTTON_ERROR_COLOR = wrappedStrip.Color(128, 0, 128);
-uint32_t RTC_ERROR_COLOR = wrappedStrip.Color(255, 0, 0);
-uint32_t WARNING_COLOR = wrappedStrip.Color(255, 128, 0);
+CRGB OFF_COLOR = CRGB::Black;
+CRGB ERROR_COLOR = CRGB(255, 32, 32);
+CRGB I2C_ERROR_COLOR = CRGB(0, 255, 128);
+CRGB BUTTON_ERROR_COLOR = CRGB(128, 0, 128);
+CRGB RTC_ERROR_COLOR = CRGB(255, 0, 0);
+CRGB WARNING_COLOR = CRGB(255, 128, 0);
 
 struct ColorScheme
 {
-    uint32_t markerColor;
-    uint32_t hourColor;
-    uint32_t minuteColor;
-    uint32_t secondColor;
+    CRGB markerColor;
+    CRGB hourColor;
+    CRGB minuteColor;
+    CRGB secondColor;
 };
 
 const ColorScheme colorSchemes[COLOR_SCHEME_COUNT] = {
     // Default - Purple markers, green/blue hands
     {
-        wrappedStrip.Color(51, 0, 51),   // marker
-        wrappedStrip.Color(153, 204, 0), // hour
-        wrappedStrip.Color(0, 159, 255), // minute
-        wrappedStrip.Color(0, 0, 255)    // second
+        CRGB(51, 0, 51),   // marker
+        CRGB(153, 204, 0), // hour
+        CRGB(0, 159, 255), // minute
+        CRGB(0, 0, 255)    // second
     },
     // Sunset - Orange markers, blue/teal hands
     {
-        wrappedStrip.Color(255, 128, 0), // marker
-        wrappedStrip.Color(0, 128, 255), // hour
-        wrappedStrip.Color(0, 255, 255), // minute
-        wrappedStrip.Color(0, 128, 128)  // second
+        CRGB(255, 128, 0), // marker
+        CRGB(0, 128, 255), // hour
+        CRGB(0, 255, 255), // minute
+        CRGB(0, 128, 128)  // second
     },
     // Forest - Green markers, red/pink hands
     {
-        wrappedStrip.Color(0, 128, 0),   // marker
-        wrappedStrip.Color(255, 0, 0),   // hour
-        wrappedStrip.Color(255, 0, 128), // minute
-        wrappedStrip.Color(128, 0, 64)   // second
+        CRGB(0, 128, 0),   // marker
+        CRGB(255, 0, 0),   // hour
+        CRGB(255, 0, 128), // minute
+        CRGB(128, 0, 64)   // second
     },
     // Ocean - Teal markers, orange/yellow hands
     {
-        wrappedStrip.Color(0, 128, 128), // marker
-        wrappedStrip.Color(255, 128, 0), // hour
-        wrappedStrip.Color(255, 255, 0), // minute
-        wrappedStrip.Color(128, 128, 0)  // second
+        CRGB(0, 128, 128), // marker
+        CRGB(255, 128, 0), // hour
+        CRGB(255, 255, 0), // minute
+        CRGB(128, 128, 0)  // second
     },
     // Royal - Gold markers, purple/blue hands
     {
-        wrappedStrip.Color(255, 215, 0), // marker
-        wrappedStrip.Color(128, 0, 255), // hour
-        wrappedStrip.Color(0, 0, 255),   // minute
-        wrappedStrip.Color(64, 0, 128)   // second
+        CRGB(255, 215, 0), // marker
+        CRGB(128, 0, 255), // hour
+        CRGB(0, 0, 255),   // minute
+        CRGB(64, 0, 128)   // second
     },
     // Neon - Pink markers, cyan/green hands
     {
-        wrappedStrip.Color(255, 0, 255), // marker
-        wrappedStrip.Color(0, 255, 255), // hour
-        wrappedStrip.Color(0, 255, 128), // minute
-        wrappedStrip.Color(0, 128, 255)  // second
+        CRGB(255, 0, 255), // marker
+        CRGB(0, 255, 255), // hour
+        CRGB(0, 255, 128), // minute
+        CRGB(0, 128, 255)  // second
     },
     // Autumn - Brown markers, sky blue/light blue hands
     {
-        wrappedStrip.Color(139, 69, 19),   // marker
-        wrappedStrip.Color(135, 206, 235), // hour
-        wrappedStrip.Color(173, 216, 230), // minute
-        wrappedStrip.Color(176, 224, 230)  // second
+        CRGB(139, 69, 19),   // marker
+        CRGB(135, 206, 235), // hour
+        CRGB(173, 216, 230), // minute
+        CRGB(176, 224, 230)  // second
     },
     // Winter - Silver markers, deep blue/light blue hands
     {
-        wrappedStrip.Color(192, 192, 192), // marker
-        wrappedStrip.Color(0, 0, 139),     // hour
-        wrappedStrip.Color(0, 0, 205),     // minute
-        wrappedStrip.Color(0, 0, 255)      // second
+        CRGB(192, 192, 192), // marker
+        CRGB(0, 0, 139),     // hour
+        CRGB(0, 0, 205),     // minute
+        CRGB(0, 0, 255)      // second
     },
     // Fire - Red markers, orange/yellow hands
     {
-        wrappedStrip.Color(255, 0, 0),   // marker
-        wrappedStrip.Color(255, 128, 0), // hour
-        wrappedStrip.Color(255, 255, 0), // minute
-        wrappedStrip.Color(255, 200, 0)  // second
+        CRGB(255, 0, 0),   // marker
+        CRGB(255, 128, 0), // hour
+        CRGB(255, 255, 0), // minute
+        CRGB(255, 200, 0)  // second
     },
     // Mint - Mint markers, teal/blue hands
     {
-        wrappedStrip.Color(152, 255, 152), // marker
-        wrappedStrip.Color(0, 128, 128),   // hour
-        wrappedStrip.Color(0, 0, 255),     // minute
-        wrappedStrip.Color(0, 64, 128)     // second
+        CRGB(152, 255, 152), // marker
+        CRGB(0, 128, 128),   // hour
+        CRGB(0, 0, 255),     // minute
+        CRGB(0, 64, 128)     // second
     },
     // Lavender - Purple markers, pink/red hands
     {
-        wrappedStrip.Color(230, 230, 250), // marker
-        wrappedStrip.Color(255, 192, 203), // hour
-        wrappedStrip.Color(255, 0, 0),     // minute
-        wrappedStrip.Color(128, 0, 0)      // second
+        CRGB(230, 230, 250), // marker
+        CRGB(255, 192, 203), // hour
+        CRGB(255, 0, 0),     // minute
+        CRGB(128, 0, 0)      // second
     }};
 
 const uint8_t brightnessLevels[] = {
@@ -345,9 +355,9 @@ void resetToDefaults()
 
 void setup()
 {
-    wrappedStrip.begin();
+    FastLED.addLeds<WS2812B, NEOPIXEL_PIN, GRB>(strip.getLeds(), PIXELS);
     strip.begin();
-    clearStrip();
+    strip.clear();
     strip.show();
 
     pinMode(COMMON_GROUND, OUTPUT);
@@ -394,7 +404,7 @@ void setup()
     strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
     for (int i = 0; i < PIXELS; i++)
     {
-        strip.setPixelColor(i, wrappedStrip.Color(51, 0, 51), false);
+        strip.setPixelColor(i, LEDStrip::Color(51, 0, 51), false);
         strip.show();
         delayAndCheckButtons(4);
     }
@@ -547,7 +557,7 @@ void runRTCDiagnostics()
     rtcWorking = true;
 }
 
-void showDiagnosticPattern(uint32_t color)
+void showDiagnosticPattern(CRGB color)
 {
     static bool rtcErrorShown = false;
     uint8_t oldBrightness = strip.getBrightness();
@@ -853,7 +863,7 @@ void performAction(uint8_t buttonPin)
         now = DateTime(2020, 1, 1, fallbackHour, fallbackMinute, fallbackSecond);
     }
 
-    clearStrip();
+    strip.clear();
     strip.show();
     renderClockFace();
     delay(100);
@@ -909,14 +919,9 @@ void saveSettings()
     }
 }
 
-void clearStrip()
-{
-    strip.clear();
-}
-
 void renderClockFace()
 {
-    clearStrip();
+    strip.clear();
 
     const ColorScheme &scheme = colorSchemes[currentColorScheme];
 
@@ -934,7 +939,7 @@ void renderClockFace()
         uint8_t r = ((uint32_t)scheme.markerColor >> 16 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t g = ((uint32_t)scheme.markerColor >> 8 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t b = ((uint32_t)scheme.markerColor & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
-        uint32_t MINUTE_MARKER_COLOR = wrappedStrip.Color(r, g, b);
+        CRGB MINUTE_MARKER_COLOR = LEDStrip::Color(r, g, b);
 
         for (int i = 0; i < 60; i++)
         {
@@ -982,7 +987,7 @@ void animateSecond(uint8_t start, uint8_t count, uint8_t _end)
     while (count > 0)
     {
         uint8_t led = seekBackward(start, count);
-        uint32_t color = wrappedStrip.Color(brightness, 0, brightness / 2);
+        CRGB color = LEDStrip::Color(brightness, 0, brightness / 2);
         strip.setPixelColor(led, color, false);
         strip.show();
         delayAndCheckButtons(_delay);
@@ -1035,7 +1040,7 @@ void loop()
         updateFallbackTime();
     }
 
-    clearStrip();
+    strip.clear();
     renderClockFace();
 
     bool anyButtonPressed = false;
@@ -1075,19 +1080,19 @@ void clearEEPROM()
 
     for (int i = 0; i < PIXELS; i++)
     {
-        strip.setPixelColor(i, wrappedStrip.Color(64, 0, 0), false);
+        strip.setPixelColor(i, LEDStrip::Color(64, 0, 0), false);
     }
     strip.show();
     delay(800);
 
-    clearStrip();
+    strip.clear();
     strip.show();
     delay(700);
 }
 
 void showSettingIndicator(SettingMode kind)
 {
-    clearStrip();
+    strip.clear();
 
     switch (kind)
     {
@@ -1098,7 +1103,7 @@ void showSettingIndicator(SettingMode kind)
             if (brightness > 255)
                 brightness = 255;
             brightness = brightness * 0.6; // Reduce to 60%
-            strip.setPixelColor(i, wrappedStrip.Color(brightness, brightness, 0), false);
+            strip.setPixelColor(i, LEDStrip::Color(brightness, brightness, 0), false);
         }
         break;
 
@@ -1108,7 +1113,7 @@ void showSettingIndicator(SettingMode kind)
             if (i % 10 < 5)
             {
                 uint8_t brightness = 255 * 0.6; // Reduce to 60%
-                strip.setPixelColor(i, wrappedStrip.Color(0, brightness, 0), false);
+                strip.setPixelColor(i, LEDStrip::Color(0, brightness, 0), false);
             }
         }
         break;
@@ -1145,7 +1150,7 @@ void showSettingIndicator(SettingMode kind)
             g = g * 0.6;
             b = b * 0.6;
 
-            strip.setPixelColor(i, wrappedStrip.Color(r, g, b), false);
+            strip.setPixelColor(i, LEDStrip::Color(r, g, b), false);
         }
         break;
     }
