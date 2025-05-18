@@ -12,8 +12,9 @@ private:
     {
         if (!initialized)
         {
-            Serial.begin(115200);
-            delay(1000);
+            Serial.begin(9600); // More reliable baud rate for Metro
+            delay(2000);        // Longer delay for Metro's USB serial to stabilize
+            Serial.println();
             Serial.println("Serial initialized");
             initialized = true;
         }
@@ -24,36 +25,42 @@ public:
     {
         ensureInitialized();
         Serial.print(str);
+        Serial.flush(); // Ensure data is sent
     }
 
     void println(const char *str)
     {
         ensureInitialized();
         Serial.println(str);
+        Serial.flush(); // Ensure data is sent
     }
 
     void print(int val)
     {
         ensureInitialized();
         Serial.print(val);
+        Serial.flush(); // Ensure data is sent
     }
 
     void println(int val)
     {
         ensureInitialized();
         Serial.println(val);
+        Serial.flush(); // Ensure data is sent
     }
 
     void print(byte val, int format)
     {
         ensureInitialized();
         Serial.print(val, format);
+        Serial.flush(); // Ensure data is sent
     }
 
     void println(byte val, int format)
     {
         ensureInitialized();
         Serial.println(val, format);
+        Serial.flush(); // Ensure data is sent
     }
 };
 
@@ -116,6 +123,7 @@ public:
         for (uint16_t i = 0; i < pixelCount; i++)
         {
             pixelDirty[i] = false;
+            pixelHistory[i] = 0;
         }
         strip.clear();
     }
@@ -154,14 +162,14 @@ public:
 #define INDICATOR_DURATION 700
 #define MAX_BRIGHTNESS 200
 #define SYNC_MAX 3600
-#define DIAGNOSTIC_BRIGHTNESS 20
+#define DIAGNOSTIC_BRIGHTNESS 90
 #define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
 
-#define COMMON_GROUND 10
-#define HOUR_BUTTON 14
-#define MINUTE_BUTTON 16
-#define BRIGHTNESS_BUTTON 15
-#define MODE_BUTTON 18
+#define COMMON_GROUND 0
+#define HOUR_BUTTON 2
+#define MINUTE_BUTTON 1
+#define BRIGHTNESS_BUTTON 3
+#define MODE_BUTTON 4
 
 #define ROTATE 0
 
@@ -176,16 +184,16 @@ public:
 #define HOUR_LED_COUNT 1
 #define SECOND_LED_COUNT 18
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ800);
-NeoPixelStrip ledStrip(strip);
+Adafruit_NeoPixel wrappedStrip = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ800);
+NeoPixelStrip strip(wrappedStrip);
 RTC_DS3231 RTC;
 
-uint32_t OFF_COLOR = strip.Color(0, 0, 0);
-uint32_t ERROR_COLOR = strip.Color(255, 32, 32);
-uint32_t I2C_ERROR_COLOR = strip.Color(0, 255, 128);
-uint32_t BUTTON_ERROR_COLOR = strip.Color(128, 0, 128);
-uint32_t RTC_ERROR_COLOR = strip.Color(255, 0, 0);
-uint32_t WARNING_COLOR = strip.Color(255, 128, 0);
+uint32_t OFF_COLOR = wrappedStrip.Color(0, 0, 0);
+uint32_t ERROR_COLOR = wrappedStrip.Color(255, 32, 32);
+uint32_t I2C_ERROR_COLOR = wrappedStrip.Color(0, 255, 128);
+uint32_t BUTTON_ERROR_COLOR = wrappedStrip.Color(128, 0, 128);
+uint32_t RTC_ERROR_COLOR = wrappedStrip.Color(255, 0, 0);
+uint32_t WARNING_COLOR = wrappedStrip.Color(255, 128, 0);
 
 struct ColorScheme
 {
@@ -198,80 +206,80 @@ struct ColorScheme
 const ColorScheme colorSchemes[COLOR_SCHEME_COUNT] = {
     // Default - Purple markers, green/blue hands
     {
-        strip.Color(51, 0, 51),   // marker
-        strip.Color(153, 204, 0), // hour
-        strip.Color(0, 159, 255), // minute
-        strip.Color(0, 0, 255)    // second
+        wrappedStrip.Color(51, 0, 51),   // marker
+        wrappedStrip.Color(153, 204, 0), // hour
+        wrappedStrip.Color(0, 159, 255), // minute
+        wrappedStrip.Color(0, 0, 255)    // second
     },
     // Sunset - Orange markers, blue/teal hands
     {
-        strip.Color(255, 128, 0), // marker
-        strip.Color(0, 128, 255), // hour
-        strip.Color(0, 255, 255), // minute
-        strip.Color(0, 128, 128)  // second
+        wrappedStrip.Color(255, 128, 0), // marker
+        wrappedStrip.Color(0, 128, 255), // hour
+        wrappedStrip.Color(0, 255, 255), // minute
+        wrappedStrip.Color(0, 128, 128)  // second
     },
     // Forest - Green markers, red/pink hands
     {
-        strip.Color(0, 128, 0),   // marker
-        strip.Color(255, 0, 0),   // hour
-        strip.Color(255, 0, 128), // minute
-        strip.Color(128, 0, 64)   // second
+        wrappedStrip.Color(0, 128, 0),   // marker
+        wrappedStrip.Color(255, 0, 0),   // hour
+        wrappedStrip.Color(255, 0, 128), // minute
+        wrappedStrip.Color(128, 0, 64)   // second
     },
     // Ocean - Teal markers, orange/yellow hands
     {
-        strip.Color(0, 128, 128), // marker
-        strip.Color(255, 128, 0), // hour
-        strip.Color(255, 255, 0), // minute
-        strip.Color(128, 128, 0)  // second
+        wrappedStrip.Color(0, 128, 128), // marker
+        wrappedStrip.Color(255, 128, 0), // hour
+        wrappedStrip.Color(255, 255, 0), // minute
+        wrappedStrip.Color(128, 128, 0)  // second
     },
     // Royal - Gold markers, purple/blue hands
     {
-        strip.Color(255, 215, 0), // marker
-        strip.Color(128, 0, 255), // hour
-        strip.Color(0, 0, 255),   // minute
-        strip.Color(64, 0, 128)   // second
+        wrappedStrip.Color(255, 215, 0), // marker
+        wrappedStrip.Color(128, 0, 255), // hour
+        wrappedStrip.Color(0, 0, 255),   // minute
+        wrappedStrip.Color(64, 0, 128)   // second
     },
     // Neon - Pink markers, cyan/green hands
     {
-        strip.Color(255, 0, 255), // marker
-        strip.Color(0, 255, 255), // hour
-        strip.Color(0, 255, 128), // minute
-        strip.Color(0, 128, 255)  // second
+        wrappedStrip.Color(255, 0, 255), // marker
+        wrappedStrip.Color(0, 255, 255), // hour
+        wrappedStrip.Color(0, 255, 128), // minute
+        wrappedStrip.Color(0, 128, 255)  // second
     },
     // Autumn - Brown markers, sky blue/light blue hands
     {
-        strip.Color(139, 69, 19),   // marker
-        strip.Color(135, 206, 235), // hour
-        strip.Color(173, 216, 230), // minute
-        strip.Color(176, 224, 230)  // second
+        wrappedStrip.Color(139, 69, 19),   // marker
+        wrappedStrip.Color(135, 206, 235), // hour
+        wrappedStrip.Color(173, 216, 230), // minute
+        wrappedStrip.Color(176, 224, 230)  // second
     },
     // Winter - Silver markers, deep blue/light blue hands
     {
-        strip.Color(192, 192, 192), // marker
-        strip.Color(0, 0, 139),     // hour
-        strip.Color(0, 0, 205),     // minute
-        strip.Color(0, 0, 255)      // second
+        wrappedStrip.Color(192, 192, 192), // marker
+        wrappedStrip.Color(0, 0, 139),     // hour
+        wrappedStrip.Color(0, 0, 205),     // minute
+        wrappedStrip.Color(0, 0, 255)      // second
     },
     // Fire - Red markers, orange/yellow hands
     {
-        strip.Color(255, 0, 0),   // marker
-        strip.Color(255, 128, 0), // hour
-        strip.Color(255, 255, 0), // minute
-        strip.Color(255, 200, 0)  // second
+        wrappedStrip.Color(255, 0, 0),   // marker
+        wrappedStrip.Color(255, 128, 0), // hour
+        wrappedStrip.Color(255, 255, 0), // minute
+        wrappedStrip.Color(255, 200, 0)  // second
     },
     // Mint - Mint markers, teal/blue hands
     {
-        strip.Color(152, 255, 152), // marker
-        strip.Color(0, 128, 128),   // hour
-        strip.Color(0, 0, 255),     // minute
-        strip.Color(0, 64, 128)     // second
+        wrappedStrip.Color(152, 255, 152), // marker
+        wrappedStrip.Color(0, 128, 128),   // hour
+        wrappedStrip.Color(0, 0, 255),     // minute
+        wrappedStrip.Color(0, 64, 128)     // second
     },
     // Lavender - Purple markers, pink/red hands
     {
-        strip.Color(230, 230, 250), // marker
-        strip.Color(255, 192, 203), // hour
-        strip.Color(255, 0, 0),     // minute
-        strip.Color(128, 0, 0)      // second
+        wrappedStrip.Color(230, 230, 250), // marker
+        wrappedStrip.Color(255, 192, 203), // hour
+        wrappedStrip.Color(255, 0, 0),     // minute
+        wrappedStrip.Color(128, 0, 0)      // second
     }};
 
 const uint8_t brightnessLevels[] = {
@@ -337,10 +345,10 @@ void resetToDefaults()
 
 void setup()
 {
+    wrappedStrip.begin();
     strip.begin();
-    ledStrip.begin();
     clearStrip();
-    ledStrip.show();
+    strip.show();
 
     pinMode(COMMON_GROUND, OUTPUT);
     digitalWrite(COMMON_GROUND, LOW);
@@ -383,18 +391,18 @@ void setup()
         EEPROM.write(EEPROM_COLOR_SCHEME_ADDR, currentColorScheme);
     }
 
-    ledStrip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
+    strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
     for (int i = 0; i < PIXELS; i++)
     {
-        ledStrip.setPixelColor(i, strip.Color(51, 0, 51));
-        ledStrip.show();
-        delayAndCheckButtons(5);
+        strip.setPixelColor(i, wrappedStrip.Color(51, 0, 51), false);
+        strip.show();
+        delayAndCheckButtons(4);
     }
     for (int i = 0; i < PIXELS; i++)
     {
-        ledStrip.setPixelColor(i, OFF_COLOR);
-        ledStrip.show();
-        delayAndCheckButtons(5);
+        strip.setPixelColor(i, OFF_COLOR, false);
+        strip.show();
+        delayAndCheckButtons(4);
     }
 
     runRTCDiagnostics();
@@ -403,18 +411,18 @@ void setup()
     {
         if (digitalRead(BUTTON_PINS[i]) != HIGH)
         {
-            ledStrip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
+            strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
             for (int j = 0; j < PIXELS; j++)
             {
-                ledStrip.setPixelColor(j, BUTTON_ERROR_COLOR);
+                strip.setPixelColor(j, BUTTON_ERROR_COLOR, false);
             }
-            ledStrip.show();
+            strip.show();
             delayAndCheckButtons(100);
             for (int i = 0; i < PIXELS; i++)
             {
-                ledStrip.setPixelColor(i, OFF_COLOR);
+                strip.setPixelColor(i, OFF_COLOR, false);
             }
-            ledStrip.show();
+            strip.show();
         }
     }
 
@@ -454,7 +462,6 @@ void runRTCDiagnostics()
     byte error;
 
     // First do a basic I2C scan
-    Debug.println("Starting I2C scan...");
     for (byte address = 1; address < 127; address++)
     {
         Wire.beginTransmission(address);
@@ -463,8 +470,6 @@ void runRTCDiagnostics()
 
         if (error == 0)
         {
-            Debug.print("Found device at address 0x");
-            Debug.println(address, HEX);
             deviceCount++;
         }
     }
@@ -477,9 +482,6 @@ void runRTCDiagnostics()
         return;
     }
 
-    // Now try to communicate with DS1307
-    Debug.println("Attempting to communicate with DS1307...");
-
     // Try to read the seconds register first (simplest operation)
     Wire.beginTransmission(0x68);
     Wire.write(0x00); // Seconds register
@@ -491,8 +493,6 @@ void runRTCDiagnostics()
         if (Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
         {
             byte seconds = Wire.read();
-            Debug.print("Successfully read seconds register: 0x");
-            Debug.println(seconds, HEX);
 
             // Now try to read control register
             Wire.beginTransmission(0x68);
@@ -505,8 +505,6 @@ void runRTCDiagnostics()
                 if (Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
                 {
                     byte control = Wire.read();
-                    Debug.print("Control register value: 0x");
-                    Debug.println(control, HEX);
 
                     // Check if oscillator is running
                     if (control & 0x80)
@@ -547,7 +545,6 @@ void runRTCDiagnostics()
     }
 
     rtcWorking = true;
-    Debug.println("RTC initialized successfully");
 }
 
 void showDiagnosticPattern(uint32_t color)
@@ -568,7 +565,7 @@ void showDiagnosticPattern(uint32_t color)
 
     for (int i = 0; i < PIXELS; i++)
     {
-        strip.setPixelColor(i, OFF_COLOR);
+        strip.setPixelColor(i, OFF_COLOR, false);
     }
     strip.show();
     delay(250);
@@ -579,13 +576,13 @@ void showDiagnosticPattern(uint32_t color)
         {
             for (int i = 0; i < PIXELS; i++)
             {
-                strip.setPixelColor(i, (i % 2 == 0) ? ERROR_COLOR : OFF_COLOR);
+                strip.setPixelColor(i, (i % 2 == 0) ? ERROR_COLOR : OFF_COLOR, false);
             }
             strip.show();
             delay(250);
             for (int i = 0; i < PIXELS; i++)
             {
-                strip.setPixelColor(i, (i % 2 == 1) ? ERROR_COLOR : OFF_COLOR);
+                strip.setPixelColor(i, (i % 2 == 1) ? ERROR_COLOR : OFF_COLOR, false);
             }
             strip.show();
             delay(250);
@@ -595,8 +592,8 @@ void showDiagnosticPattern(uint32_t color)
     {
         for (int i = 0; i < PIXELS; i++)
         {
-            strip.setPixelColor(i, OFF_COLOR);
-            strip.setPixelColor((i + 1) % PIXELS, I2C_ERROR_COLOR);
+            strip.setPixelColor(i, OFF_COLOR, false);
+            strip.setPixelColor((i + 1) % PIXELS, I2C_ERROR_COLOR, false);
             strip.show();
             delay(20);
         }
@@ -606,22 +603,22 @@ void showDiagnosticPattern(uint32_t color)
         rtcErrorShown = true;
         for (int i = 0; i < PIXELS; i++)
         {
-            strip.setPixelColor(i, OFF_COLOR);
+            strip.setPixelColor(i, OFF_COLOR, false);
         }
         strip.show();
         delay(250);
 
         for (int i = 0; i < PIXELS; i++)
         {
-            strip.setPixelColor(i, OFF_COLOR);
-            strip.setPixelColor((i + 1) % PIXELS, RTC_ERROR_COLOR);
+            strip.setPixelColor(i, OFF_COLOR, false);
+            strip.setPixelColor((i + 1) % PIXELS, RTC_ERROR_COLOR, false);
             strip.show();
             delay(20);
         }
 
         for (int i = 0; i < PIXELS; i++)
         {
-            strip.setPixelColor(i, OFF_COLOR);
+            strip.setPixelColor(i, OFF_COLOR, false);
         }
         strip.show();
         delay(250);
@@ -632,9 +629,9 @@ void showDiagnosticPattern(uint32_t color)
         {
             for (int i = 0; i < PIXELS; i++)
             {
-                strip.setPixelColor(i, OFF_COLOR);
-                strip.setPixelColor((i + 1) % PIXELS, WARNING_COLOR);
-                strip.setPixelColor((i + 2) % PIXELS, WARNING_COLOR);
+                strip.setPixelColor(i, OFF_COLOR, false);
+                strip.setPixelColor((i + 1) % PIXELS, WARNING_COLOR, false);
+                strip.setPixelColor((i + 2) % PIXELS, WARNING_COLOR, false);
                 strip.show();
                 delay(2);
             }
@@ -914,7 +911,7 @@ void saveSettings()
 
 void clearStrip()
 {
-    ledStrip.clear();
+    strip.clear();
 }
 
 void renderClockFace()
@@ -928,7 +925,7 @@ void renderClockFace()
     {
         for (int i = 0; i < 60; i += 5)
         {
-            ledStrip.setPixelColor(i, scheme.markerColor);
+            strip.setPixelColor(i, scheme.markerColor);
         }
     }
 
@@ -937,13 +934,13 @@ void renderClockFace()
         uint8_t r = ((uint32_t)scheme.markerColor >> 16 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t g = ((uint32_t)scheme.markerColor >> 8 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t b = ((uint32_t)scheme.markerColor & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
-        uint32_t MINUTE_MARKER_COLOR = strip.Color(r, g, b);
+        uint32_t MINUTE_MARKER_COLOR = wrappedStrip.Color(r, g, b);
 
         for (int i = 0; i < 60; i++)
         {
             if (i % 5 != 0)
             {
-                ledStrip.setPixelColor(i, MINUTE_MARKER_COLOR);
+                strip.setPixelColor(i, MINUTE_MARKER_COLOR);
             }
         }
     }
@@ -956,7 +953,7 @@ void renderClockFace()
 
     for (volatile uint8_t i = 0; i < MINUTE_LED_COUNT; i++)
     {
-        ledStrip.setPixelColor(minutes, scheme.minuteColor);
+        strip.setPixelColor(minutes, scheme.minuteColor);
         minutes = seekBackward(start, i + 1);
     }
 
@@ -969,11 +966,11 @@ void renderClockFace()
 
     for (volatile uint8_t i = 0; i < HOUR_LED_COUNT; i++)
     {
-        ledStrip.setPixelColor(hours, scheme.hourColor);
+        strip.setPixelColor(hours, scheme.hourColor);
         hours = seekBackward(start, i + 1);
     }
 
-    ledStrip.show();
+    strip.show();
 }
 
 void animateSecond(uint8_t start, uint8_t count, uint8_t _end)
@@ -985,14 +982,14 @@ void animateSecond(uint8_t start, uint8_t count, uint8_t _end)
     while (count > 0)
     {
         uint8_t led = seekBackward(start, count);
-        uint32_t color = strip.Color(brightness, 0, brightness / 2);
-        ledStrip.setPixelColor(led, color, false);
-        ledStrip.show();
+        uint32_t color = wrappedStrip.Color(brightness, 0, brightness / 2);
+        strip.setPixelColor(led, color, false);
+        strip.show();
         delayAndCheckButtons(_delay);
         if (count > 1)
         {
-            ledStrip.setPixelColor(led, ledStrip.getPixelHistory(led), false);
-            ledStrip.show();
+            strip.setPixelColor(led, strip.getPixelHistory(led), false);
+            strip.show();
         }
         count--;
         brightness += add;
@@ -1078,7 +1075,7 @@ void clearEEPROM()
 
     for (int i = 0; i < PIXELS; i++)
     {
-        strip.setPixelColor(i, strip.Color(64, 0, 0));
+        strip.setPixelColor(i, wrappedStrip.Color(64, 0, 0), false);
     }
     strip.show();
     delay(800);
@@ -1100,7 +1097,8 @@ void showSettingIndicator(SettingMode kind)
             uint8_t brightness = (i * 255) / (PIXELS / 4);
             if (brightness > 255)
                 brightness = 255;
-            strip.setPixelColor(i, strip.Color(brightness, brightness, 0));
+            brightness = brightness * 0.6; // Reduce to 60%
+            strip.setPixelColor(i, wrappedStrip.Color(brightness, brightness, 0), false);
         }
         break;
 
@@ -1109,7 +1107,8 @@ void showSettingIndicator(SettingMode kind)
         {
             if (i % 10 < 5)
             {
-                strip.setPixelColor(i, strip.Color(0, 255, 0));
+                uint8_t brightness = 255 * 0.6; // Reduce to 60%
+                strip.setPixelColor(i, wrappedStrip.Color(0, brightness, 0), false);
             }
         }
         break;
@@ -1141,7 +1140,12 @@ void showSettingIndicator(SettingMode kind)
                 b = 255 - hue * 3;
             }
 
-            strip.setPixelColor(i, strip.Color(r, g, b));
+            // Reduce all colors to 60%
+            r = r * 0.6;
+            g = g * 0.6;
+            b = b * 0.6;
+
+            strip.setPixelColor(i, wrappedStrip.Color(r, g, b), false);
         }
         break;
     }
