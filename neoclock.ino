@@ -441,43 +441,103 @@ void setup()
 
 void runRTCDiagnostics()
 {
+    // Start with a clean I2C bus
+    Wire.end();
+    delay(100);
+
+    // Initialize with very slow clock
     Wire.begin();
+    Wire.setClock(10000); // 10kHz
     delay(100);
 
-    Wire.setClock(10000);
-    delay(100);
-
-    byte error, address;
     int deviceCount = 0;
+    byte error;
 
-    for (int scan = 0; scan < 2; scan++)
+    // First do a basic I2C scan
+    Debug.println("Starting I2C scan...");
+    for (byte address = 1; address < 127; address++)
     {
-        for (address = 1; address < 127; address++)
-        {
-            Wire.beginTransmission(address);
-            error = Wire.endTransmission();
+        Wire.beginTransmission(address);
+        error = Wire.endTransmission();
+        delay(5); // Small delay between addresses
 
-            if (error == 0)
-            {
-                deviceCount++;
-            }
+        if (error == 0)
+        {
+            Debug.print("Found device at address 0x");
+            Debug.println(address, HEX);
+            deviceCount++;
         }
-        if (deviceCount > 0)
-            break;
-        delay(100);
     }
 
     if (deviceCount == 0)
     {
-        Debug.println("No I2C devices found!");
+        Debug.println("No I2C devices found in initial scan!");
         showDiagnosticPattern(I2C_ERROR_COLOR);
         rtcWorking = false;
         return;
     }
 
-    Wire.setClock(100000);
-    delay(100);
+    // Now try to communicate with DS1307
+    Debug.println("Attempting to communicate with DS1307...");
 
+    // Try to read the seconds register first (simplest operation)
+    Wire.beginTransmission(0x68);
+    Wire.write(0x00); // Seconds register
+    error = Wire.endTransmission();
+    delay(10); // Longer delay after write
+
+    if (error == 0)
+    {
+        if (Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
+        {
+            byte seconds = Wire.read();
+            Debug.print("Successfully read seconds register: 0x");
+            Debug.println(seconds, HEX);
+
+            // Now try to read control register
+            Wire.beginTransmission(0x68);
+            Wire.write(0x07); // Control register
+            error = Wire.endTransmission();
+            delay(10);
+
+            if (error == 0)
+            {
+                if (Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
+                {
+                    byte control = Wire.read();
+                    Debug.print("Control register value: 0x");
+                    Debug.println(control, HEX);
+
+                    // Check if oscillator is running
+                    if (control & 0x80)
+                    {
+                        Debug.println("Oscillator is stopped!");
+                        // Try to start the oscillator
+                        Wire.beginTransmission(0x68);
+                        Wire.write(0x07);
+                        Wire.write(control & 0x7F); // Clear bit 7
+                        error = Wire.endTransmission();
+                        delay(10);
+
+                        if (error == 0)
+                        {
+                            Debug.println("Oscillator started");
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        Debug.print("Failed to communicate with DS1307, error: ");
+        Debug.println(error);
+        showDiagnosticPattern(I2C_ERROR_COLOR);
+        rtcWorking = false;
+        return;
+    }
+
+    // Now try to initialize the RTC
     if (!RTC.begin())
     {
         Debug.println("RTC initialization failed!");
@@ -486,21 +546,8 @@ void runRTCDiagnostics()
         return;
     }
 
-    Wire.beginTransmission(0x68);
-    Wire.write(0x00);
-    Wire.endTransmission();
-
-    Wire.requestFrom(0x68, 1);
-    if (Wire.available())
-    {
-        byte reg0 = Wire.read();
-        if (reg0 & 0x80)
-        {
-            RTC.adjust(DateTime(__DATE__, __TIME__));
-        }
-    }
-
     rtcWorking = true;
+    Debug.println("RTC initialized successfully");
 }
 
 void showDiagnosticPattern(uint32_t color)
