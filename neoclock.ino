@@ -13,11 +13,11 @@
 #define SYNC_MAX 3600
 #define DIAGNOSTIC_BRIGHTNESS 90
 #define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
-#define COMMON_GROUND 0
-#define HOUR_BUTTON 2
-#define MINUTE_BUTTON 1
-#define BRIGHTNESS_BUTTON 3
-#define MODE_BUTTON 4
+#define COMMON_GROUND 2
+#define HOUR_BUTTON 4
+#define MINUTE_BUTTON 3
+#define BRIGHTNESS_BUTTON 5
+#define MODE_BUTTON 6
 #define ROTATE 0
 #define COLOR_SCHEME_COUNT 11
 #define MODES_PER_SCHEME 3
@@ -442,7 +442,7 @@ void setup()
         fallbackHour = 12;
         fallbackMinute = 0;
         fallbackSecond = 0;
-        now = DateTime(2020, 1, 1, fallbackHour, fallbackMinute, fallbackSecond);
+        now = DateTime(2025, 2, 11, fallbackHour, fallbackMinute, fallbackSecond);
         previousReading = now;
     }
     else
@@ -463,13 +463,14 @@ void runRTCDiagnostics()
     Wire.end();
     delay(100);
 
-    // Initialize with very slow clock
+    // Initialize with standard clock speed
     Wire.begin();
-    Wire.setClock(10000); // 10kHz
+    Wire.setClock(100000); // 100kHz
     delay(100);
 
     int deviceCount = 0;
     byte error;
+    byte seconds = 0;
 
     // First do a basic I2C scan
     for (byte address = 1; address < 127; address++)
@@ -502,35 +503,42 @@ void runRTCDiagnostics()
     {
         if (Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
         {
-            byte seconds = Wire.read();
+            seconds = Wire.read();
 
-            // Now try to read control register
-            Wire.beginTransmission(0x68);
-            Wire.write(0x07); // Control register
-            error = Wire.endTransmission();
-            delay(10);
-
-            if (error == 0)
+            // Check if clock is halted (CH bit set)
+            if (seconds & 0x80)
             {
-                if (Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
+                Debug.println("Clock is halted, starting it...");
+                // Clock is halted, start it
+                Wire.beginTransmission(0x68);
+                Wire.write(0x00);
+                Wire.write(seconds & 0x7F); // Clear CH bit
+                error = Wire.endTransmission();
+                delay(100); // Longer delay after starting clock
+
+                if (error != 0)
                 {
-                    byte control = Wire.read();
+                    Debug.println("Failed to start clock!");
+                    showDiagnosticPattern(RTC_ERROR_COLOR);
+                    rtcWorking = false;
+                    return;
+                }
 
-                    // Check if oscillator is running
-                    if (control & 0x80)
+                // Verify clock started
+                Wire.beginTransmission(0x68);
+                Wire.write(0x00);
+                error = Wire.endTransmission();
+                delay(10);
+
+                if (error == 0 && Wire.requestFrom((uint8_t)0x68, (uint8_t)1) == 1)
+                {
+                    seconds = Wire.read();
+                    if (seconds & 0x80)
                     {
-                        Debug.println("Oscillator is stopped!");
-                        // Try to start the oscillator
-                        Wire.beginTransmission(0x68);
-                        Wire.write(0x07);
-                        Wire.write(control & 0x7F); // Clear bit 7
-                        error = Wire.endTransmission();
-                        delay(10);
-
-                        if (error == 0)
-                        {
-                            Debug.println("Oscillator started");
-                        }
+                        Debug.println("Clock still halted after start attempt!");
+                        showDiagnosticPattern(RTC_ERROR_COLOR);
+                        rtcWorking = false;
+                        return;
                     }
                 }
             }
@@ -549,6 +557,27 @@ void runRTCDiagnostics()
     if (!RTC.begin())
     {
         Debug.println("RTC initialization failed!");
+        showDiagnosticPattern(RTC_ERROR_COLOR);
+        rtcWorking = false;
+        return;
+    }
+
+    // Set initial time if CH bit was set
+    if (seconds & 0x80)
+    {
+        Debug.println("Clock was halted, setting time");
+        RTC.adjust(DateTime(2025, 2, 11, 12, 0, 0));
+        delay(100); // Give time for the adjustment to take effect
+    }
+
+    // Verify RTC is working by reading time multiple times
+    DateTime first = RTC.now();
+    delay(1000); // Wait a full second
+    DateTime second = RTC.now();
+
+    if (second.second() == first.second())
+    {
+        Debug.println("RTC appears to be stuck!");
         showDiagnosticPattern(RTC_ERROR_COLOR);
         rtcWorking = false;
         return;
@@ -1026,10 +1055,18 @@ void loop()
         if (syncLoop)
         {
             uint8_t start = now.second();
+            unsigned long syncStartTime = millis();
             while (now.second() == start)
             {
                 now = RTC.now();
                 checkNeedToPerformAction();
+
+                // Add timeout to prevent getting stuck
+                if (millis() - syncStartTime > 1000)
+                {
+                    Debug.println("RTC sync timeout - seconds not advancing");
+                    break;
+                }
             }
             syncLoop = false;
             loopCount = 0;
