@@ -1,32 +1,51 @@
-#define PIXELS 60
+//----------------------------------------------------------------------------
+// Hardware Configuration
+//----------------------------------------------------------------------------
+#define TOTAL_LEDS 60
 #define NEOPIXEL_PIN 9
+#define COMMON_GROUND_PIN 2
+#define HOUR_BUTTON_PIN 4
+#define MINUTE_BUTTON_PIN 3
+#define BRIGHTNESS_BUTTON_PIN 5
+#define MODE_BUTTON_PIN 6
+
+//----------------------------------------------------------------------------
+// Clock Display Configuration
+//----------------------------------------------------------------------------
+#define CLOCK_ROTATION 0            // Number of LEDs to rotate clockface
+#define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
+#define MINUTE_HAND_LED_COUNT 2
+#define HOUR_HAND_LED_COUNT 1
+#define SECOND_HAND_LED_COUNT 18
+#define MAX_BRIGHTNESS 200
+#define DIAGNOSTIC_BRIGHTNESS 90
+
+//----------------------------------------------------------------------------
+// User Interface Configuration
+//----------------------------------------------------------------------------
 #define BRIGHTNESS_LEVELS 5
 #define DEFAULT_BRIGHTNESS_LEVEL 3
-#define EEPROM_BRIGHTNESS_ADDR 0
-#define EEPROM_MODE_ADDR 1
-#define EEPROM_COLOR_SCHEME_ADDR 2
-#define MINUTE_RATE_LIMIT 20
-#define HOUR_RATE_LIMIT 100
-#define SETTING_RATE_LIMIT 500
-#define INDICATOR_DURATION 700
-#define MAX_BRIGHTNESS 200
-#define SYNC_MAX 3600
-#define DIAGNOSTIC_BRIGHTNESS 90
-#define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
-#define COMMON_GROUND 2
-#define HOUR_BUTTON 4
-#define MINUTE_BUTTON 3
-#define BRIGHTNESS_BUTTON 5
-#define MODE_BUTTON 6
-#define ROTATE 0
 #define COLOR_SCHEME_COUNT 11
-#define MODES_PER_SCHEME 3
+#define CLOCK_DISPLAY_MODES 3
 #define MODE_HANDS_ONLY 0
 #define MODE_HANDS_WITH_FIFTHS 1
 #define MODE_HANDS_WITH_ALL_MARKERS 2
-#define MINUTE_LED_COUNT 2
-#define HOUR_LED_COUNT 1
-#define SECOND_LED_COUNT 18
+
+//----------------------------------------------------------------------------
+// EEPROM Memory Map
+//----------------------------------------------------------------------------
+#define EEPROM_BRIGHTNESS_ADDR 0
+#define EEPROM_MODE_ADDR 1
+#define EEPROM_COLOR_SCHEME_ADDR 2
+
+//----------------------------------------------------------------------------
+// Timing Configuration
+//----------------------------------------------------------------------------
+#define MINUTE_BUTTON_RATE_LIMIT 20
+#define HOUR_BUTTON_RATE_LIMIT 100
+#define SETTING_RATE_LIMIT 500
+#define INDICATOR_DISPLAY_DURATION 700
+#define SYNC_MAX_LOOPS 3600
 
 #include <FastLED.h>
 #include <Wire.h>
@@ -195,7 +214,7 @@ public:
     }
 };
 
-LEDStrip strip(PIXELS);
+LEDStrip strip(TOTAL_LEDS);
 RTC_DS3231 RTC;
 
 CRGB OFF_COLOR = CRGB::Black;
@@ -301,7 +320,15 @@ const uint8_t brightnessLevels[] = {
     200  // Level 7: Full brightness
 };
 
-uint8_t BUTTON_PINS[] = {HOUR_BUTTON, MINUTE_BUTTON, BRIGHTNESS_BUTTON, MODE_BUTTON};
+// Button index enum to make code more readable
+enum ButtonIndex {
+    HOUR_BUTTON_IDX = 0,
+    MINUTE_BUTTON_IDX = 1,
+    BRIGHTNESS_BUTTON_IDX = 2,
+    MODE_BUTTON_IDX = 3
+};
+
+uint8_t BUTTON_PINS[] = {HOUR_BUTTON_PIN, MINUTE_BUTTON_PIN, BRIGHTNESS_BUTTON_PIN, MODE_BUTTON_PIN};
 uint8_t lastButtonState[4] = {HIGH, HIGH, HIGH, HIGH};
 unsigned long lastActionTime[4] = {0, 0, 0, 0};
 unsigned long lastClearTime = 0;
@@ -331,7 +358,7 @@ uint8_t fallbackSecond = 0;
 uint8_t currentBrightnessLevel = DEFAULT_BRIGHTNESS_LEVEL;
 boolean brightnessChanged = false;
 uint8_t currentColorScheme = 0;
-uint8_t currentMode = MODE_HANDS_WITH_FIFTHS;
+uint8_t currentDisplayMode = MODE_HANDS_WITH_FIFTHS;
 boolean modeChanged = false;
 
 enum SettingMode
@@ -346,7 +373,7 @@ SettingMode currentSettingMode = SETTING_BRIGHTNESS;
 void resetToDefaults()
 {
     currentBrightnessLevel = DEFAULT_BRIGHTNESS_LEVEL;
-    currentMode = MODE_HANDS_WITH_FIFTHS;
+    currentDisplayMode = MODE_HANDS_WITH_FIFTHS;
     currentColorScheme = 0;
     brightnessChanged = true;
     modeChanged = true;
@@ -355,13 +382,13 @@ void resetToDefaults()
 
 void setup()
 {
-    FastLED.addLeds<WS2812B, NEOPIXEL_PIN, GRB>(strip.getLeds(), PIXELS);
+    FastLED.addLeds<WS2812B, NEOPIXEL_PIN, GRB>(strip.getLeds(), TOTAL_LEDS);
     strip.begin();
     strip.clear();
     strip.show();
 
-    pinMode(COMMON_GROUND, OUTPUT);
-    digitalWrite(COMMON_GROUND, LOW);
+    pinMode(COMMON_GROUND_PIN, OUTPUT);
+    digitalWrite(COMMON_GROUND_PIN, LOW);
 
     for (uint8_t i = 0; i < 4; i++)
     {
@@ -380,14 +407,14 @@ void setup()
     }
 
     uint8_t storedMode = EEPROM.read(EEPROM_MODE_ADDR);
-    if (storedMode < MODES_PER_SCHEME)
+    if (storedMode < CLOCK_DISPLAY_MODES)
     {
-        currentMode = storedMode;
+        currentDisplayMode = storedMode;
     }
     else
     {
-        currentMode = MODE_HANDS_WITH_FIFTHS;
-        EEPROM.write(EEPROM_MODE_ADDR, currentMode);
+        currentDisplayMode = MODE_HANDS_WITH_FIFTHS;
+        EEPROM.write(EEPROM_MODE_ADDR, currentDisplayMode);
     }
 
     uint8_t storedColorScheme = EEPROM.read(EEPROM_COLOR_SCHEME_ADDR);
@@ -402,13 +429,13 @@ void setup()
     }
 
     strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
-    for (int i = 0; i < PIXELS; i++)
+    for (int i = 0; i < TOTAL_LEDS; i++)
     {
         strip.setPixelColor(i, LEDStrip::Color(51, 0, 51), false);
         strip.show();
         delayAndCheckButtons(4);
     }
-    for (int i = 0; i < PIXELS; i++)
+    for (int i = 0; i < TOTAL_LEDS; i++)
     {
         strip.setPixelColor(i, OFF_COLOR, false);
         strip.show();
@@ -422,13 +449,13 @@ void setup()
         if (digitalRead(BUTTON_PINS[i]) != HIGH)
         {
             strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
-            for (int j = 0; j < PIXELS; j++)
+            for (int j = 0; j < TOTAL_LEDS; j++)
             {
                 strip.setPixelColor(j, BUTTON_ERROR_COLOR, false);
             }
             strip.show();
             delayAndCheckButtons(100);
-            for (int i = 0; i < PIXELS; i++)
+            for (int i = 0; i < TOTAL_LEDS; i++)
             {
                 strip.setPixelColor(i, OFF_COLOR, false);
             }
@@ -602,7 +629,7 @@ void showDiagnosticPattern(CRGB color)
     else if (color == WARNING_COLOR)
         Debug.println("WARNING");
 
-    for (int i = 0; i < PIXELS; i++)
+    for (int i = 0; i < TOTAL_LEDS; i++)
     {
         strip.setPixelColor(i, OFF_COLOR, false);
     }
@@ -613,13 +640,13 @@ void showDiagnosticPattern(CRGB color)
     {
         for (int j = 0; j < 3; j++)
         {
-            for (int i = 0; i < PIXELS; i++)
+            for (int i = 0; i < TOTAL_LEDS; i++)
             {
                 strip.setPixelColor(i, (i % 2 == 0) ? ERROR_COLOR : OFF_COLOR, false);
             }
             strip.show();
             delay(250);
-            for (int i = 0; i < PIXELS; i++)
+            for (int i = 0; i < TOTAL_LEDS; i++)
             {
                 strip.setPixelColor(i, (i % 2 == 1) ? ERROR_COLOR : OFF_COLOR, false);
             }
@@ -629,10 +656,10 @@ void showDiagnosticPattern(CRGB color)
     }
     else if (color == I2C_ERROR_COLOR)
     {
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
             strip.setPixelColor(i, OFF_COLOR, false);
-            strip.setPixelColor((i + 1) % PIXELS, I2C_ERROR_COLOR, false);
+            strip.setPixelColor((i + 1) % TOTAL_LEDS, I2C_ERROR_COLOR, false);
             strip.show();
             delay(20);
         }
@@ -640,22 +667,22 @@ void showDiagnosticPattern(CRGB color)
     else if (color == RTC_ERROR_COLOR && !rtcErrorShown)
     {
         rtcErrorShown = true;
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
             strip.setPixelColor(i, OFF_COLOR, false);
         }
         strip.show();
         delay(250);
 
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
             strip.setPixelColor(i, OFF_COLOR, false);
-            strip.setPixelColor((i + 1) % PIXELS, RTC_ERROR_COLOR, false);
+            strip.setPixelColor((i + 1) % TOTAL_LEDS, RTC_ERROR_COLOR, false);
             strip.show();
             delay(20);
         }
 
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
             strip.setPixelColor(i, OFF_COLOR, false);
         }
@@ -666,11 +693,11 @@ void showDiagnosticPattern(CRGB color)
     {
         for (int j = 0; j < 3; j++)
         {
-            for (int i = 0; i < PIXELS; i++)
+            for (int i = 0; i < TOTAL_LEDS; i++)
             {
                 strip.setPixelColor(i, OFF_COLOR, false);
-                strip.setPixelColor((i + 1) % PIXELS, WARNING_COLOR, false);
-                strip.setPixelColor((i + 2) % PIXELS, WARNING_COLOR, false);
+                strip.setPixelColor((i + 1) % TOTAL_LEDS, WARNING_COLOR, false);
+                strip.setPixelColor((i + 2) % TOTAL_LEDS, WARNING_COLOR, false);
                 strip.show();
                 delay(2);
             }
@@ -739,7 +766,7 @@ void delayAndCheckButtons(uint16_t time)
 
 void checkNeedToPerformAction()
 {
-    if (digitalRead(HOUR_BUTTON) == LOW && digitalRead(BRIGHTNESS_BUTTON) == LOW)
+    if (digitalRead(HOUR_BUTTON_PIN) == LOW && digitalRead(BRIGHTNESS_BUTTON_PIN) == LOW)
     {
         if (millis() - lastClearTime >= SETTING_RATE_LIMIT)
         {
@@ -750,20 +777,20 @@ void checkNeedToPerformAction()
         return;
     }
 
-    if (digitalRead(MODE_BUTTON) == LOW)
+    if (digitalRead(MODE_BUTTON_PIN) == LOW)
     {
-        if (millis() - lastActionTime[2] >= 50)
+        if (millis() - lastActionTime[MODE_BUTTON_IDX] >= 50)
         {
             currentSettingMode = (SettingMode)((currentSettingMode + 1) % 3);
             showSettingIndicator(currentSettingMode);
-            lastActionTime[2] = millis();
+            lastActionTime[MODE_BUTTON_IDX] = millis();
         }
         return;
     }
 
-    if (digitalRead(BRIGHTNESS_BUTTON) == LOW)
+    if (digitalRead(BRIGHTNESS_BUTTON_PIN) == LOW)
     {
-        if (millis() - lastActionTime[3] >= SETTING_RATE_LIMIT)
+        if (millis() - lastActionTime[BRIGHTNESS_BUTTON_IDX] >= SETTING_RATE_LIMIT)
         {
             switch (currentSettingMode)
             {
@@ -775,7 +802,7 @@ void checkNeedToPerformAction()
                 break;
 
             case SETTING_MODE:
-                currentMode = (currentMode + 1) % MODES_PER_SCHEME;
+                currentDisplayMode = (currentDisplayMode + 1) % CLOCK_DISPLAY_MODES;
                 modeChanged = true;
                 saveSettings();
                 renderClockFace();
@@ -787,7 +814,7 @@ void checkNeedToPerformAction()
                 renderClockFace();
                 break;
             }
-            lastActionTime[3] = millis();
+            lastActionTime[BRIGHTNESS_BUTTON_IDX] = millis();
         }
         return;
     }
@@ -798,7 +825,7 @@ void checkNeedToPerformAction()
 
         if (reading == LOW)
         {
-            unsigned long rateLimit = (i == 0) ? HOUR_RATE_LIMIT : MINUTE_RATE_LIMIT;
+            unsigned long rateLimit = (i == HOUR_BUTTON_IDX) ? HOUR_BUTTON_RATE_LIMIT : MINUTE_BUTTON_RATE_LIMIT;
 
             if (millis() - lastActionTime[i] >= rateLimit)
             {
@@ -817,7 +844,7 @@ void performAction(uint8_t buttonPin)
     {
         DateTime oldTime = now;
 
-        if (buttonPin == HOUR_BUTTON)
+        if (buttonPin == HOUR_BUTTON_PIN)
         {
             uint8_t hour = now.hour() + 1;
             if (hour >= 24)
@@ -825,7 +852,7 @@ void performAction(uint8_t buttonPin)
             now = DateTime(now.year(), now.month(), now.day(), hour,
                            now.minute(), now.second());
         }
-        else if (buttonPin == MINUTE_BUTTON)
+        else if (buttonPin == MINUTE_BUTTON_PIN)
         {
             uint8_t minute = now.minute() + 1;
             if (minute > 59)
@@ -833,21 +860,21 @@ void performAction(uint8_t buttonPin)
             now = DateTime(now.year(), now.month(), now.day(), now.hour(),
                            minute, now.second());
         }
-        else if (buttonPin == BRIGHTNESS_BUTTON)
+        else if (buttonPin == BRIGHTNESS_BUTTON_PIN)
         {
             currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels) / sizeof(brightnessLevels[0]));
             updateBrightness();
             brightnessChanged = true;
             saveSettings();
         }
-        else if (buttonPin == MODE_BUTTON)
+        else if (buttonPin == MODE_BUTTON_PIN)
         {
-            currentMode = (currentMode + 1) % MODES_PER_SCHEME;
+            currentDisplayMode = (currentDisplayMode + 1) % CLOCK_DISPLAY_MODES;
             modeChanged = true;
             saveSettings();
         }
 
-        if (buttonPin == HOUR_BUTTON || buttonPin == MINUTE_BUTTON)
+        if (buttonPin == HOUR_BUTTON_PIN || buttonPin == MINUTE_BUTTON_PIN)
         {
             RTC.adjust(now);
             delay(10);
@@ -863,28 +890,28 @@ void performAction(uint8_t buttonPin)
     }
     else
     {
-        if (buttonPin == HOUR_BUTTON)
+        if (buttonPin == HOUR_BUTTON_PIN)
         {
             fallbackHour++;
             if (fallbackHour >= 24)
                 fallbackHour = 0;
         }
-        else if (buttonPin == MINUTE_BUTTON)
+        else if (buttonPin == MINUTE_BUTTON_PIN)
         {
             fallbackMinute++;
             if (fallbackMinute >= 60)
                 fallbackMinute = 0;
         }
-        else if (buttonPin == BRIGHTNESS_BUTTON)
+        else if (buttonPin == BRIGHTNESS_BUTTON_PIN)
         {
             currentBrightnessLevel = (currentBrightnessLevel + 1) % (sizeof(brightnessLevels) / sizeof(brightnessLevels[0]));
             updateBrightness();
             brightnessChanged = true;
             saveSettings();
         }
-        else if (buttonPin == MODE_BUTTON)
+        else if (buttonPin == MODE_BUTTON_PIN)
         {
-            currentMode = (currentMode + 1) % MODES_PER_SCHEME;
+            currentDisplayMode = (currentDisplayMode + 1) % CLOCK_DISPLAY_MODES;
             modeChanged = true;
             saveSettings();
         }
@@ -943,7 +970,7 @@ void saveSettings()
     }
     if (modeChanged)
     {
-        EEPROM.write(EEPROM_MODE_ADDR, currentMode);
+        EEPROM.write(EEPROM_MODE_ADDR, currentDisplayMode);
         modeChanged = false;
     }
 }
@@ -955,7 +982,8 @@ void renderClockFace()
     const ColorScheme &scheme = colorSchemes[currentColorScheme];
 
     // Draw clock face first (lowest priority)
-    if (currentMode == MODE_HANDS_WITH_FIFTHS || currentMode == MODE_HANDS_WITH_ALL_MARKERS)
+    // Draw the hour markers at 12, 1, 2, etc. positions
+    if (currentDisplayMode == MODE_HANDS_WITH_FIFTHS || currentDisplayMode == MODE_HANDS_WITH_ALL_MARKERS)
     {
         for (int i = 0; i < 60; i += 5)
         {
@@ -963,7 +991,8 @@ void renderClockFace()
         }
     }
 
-    if (currentMode == MODE_HANDS_WITH_ALL_MARKERS)
+    // Draw additional minute markers when in detailed mode
+    if (currentDisplayMode == MODE_HANDS_WITH_ALL_MARKERS)
     {
         uint8_t r = ((uint32_t)scheme.markerColor >> 16 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
         uint8_t g = ((uint32_t)scheme.markerColor >> 8 & 0xFF) * MINUTE_MARKER_BRIGHTNESS_RATIO;
@@ -982,10 +1011,10 @@ void renderClockFace()
     // Draw minute hand (medium priority)
     uint8_t minutes = now.minute();
     float percent = minutes / 60.0;
-    minutes = forward(minutes, ROTATE * 5);
+    minutes = forward(minutes, CLOCK_ROTATION * 5);
     uint8_t start = minutes;
 
-    for (volatile uint8_t i = 0; i < MINUTE_LED_COUNT; i++)
+    for (volatile uint8_t i = 0; i < MINUTE_HAND_LED_COUNT; i++)
     {
         strip.setPixelColor(minutes, scheme.minuteColor);
         minutes = seekBackward(start, i + 1);
@@ -993,12 +1022,12 @@ void renderClockFace()
 
     // Draw hour hand last (highest priority)
     uint8_t hours = (now.hour() % 12) * 5;
-    hours = forward(hours, ROTATE * 5);
+    hours = forward(hours, CLOCK_ROTATION * 5);
     float hourPercent = (float)minutes / 60.0;
     hours += (uint8_t)(5.0 * hourPercent);
     start = hours;
 
-    for (volatile uint8_t i = 0; i < HOUR_LED_COUNT; i++)
+    for (volatile uint8_t i = 0; i < HOUR_HAND_LED_COUNT; i++)
     {
         strip.setPixelColor(hours, scheme.hourColor);
         hours = seekBackward(start, i + 1);
@@ -1038,7 +1067,7 @@ uint8_t forward(uint8_t value, uint8_t steps)
 uint8_t seekBackward(uint8_t pos_, uint8_t count)
 {
     int8_t pos = pos_;
-    pos -= count % PIXELS;
+    pos -= count % TOTAL_LEDS;
     if (pos < 0)
         pos += 60;
     return pos;
@@ -1093,8 +1122,8 @@ void loop()
     if (!anyButtonPressed)
     {
         uint8_t seconds = now.second();
-        seconds = forward(seconds, ROTATE * 5);
-        animateSecond(seconds, SECOND_LED_COUNT, MAX_BRIGHTNESS);
+        seconds = forward(seconds, CLOCK_ROTATION * 5);
+        animateSecond(seconds, SECOND_HAND_LED_COUNT, MAX_BRIGHTNESS);
     }
 
     delayAndCheckButtons(500);
@@ -1102,7 +1131,7 @@ void loop()
     saveSettings();
 
     loopCount++;
-    if (loopCount >= SYNC_MAX)
+    if (loopCount >= SYNC_MAX_LOOPS)
     {
         syncLoop = true;
     }
@@ -1115,7 +1144,7 @@ void clearEEPROM()
         EEPROM.write(i, 0);
     }
 
-    for (int i = 0; i < PIXELS; i++)
+    for (int i = 0; i < TOTAL_LEDS; i++)
     {
         strip.setPixelColor(i, LEDStrip::Color(64, 0, 0), false);
     }
@@ -1134,9 +1163,9 @@ void showSettingIndicator(SettingMode kind)
     switch (kind)
     {
     case SETTING_BRIGHTNESS:
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
-            uint8_t brightness = (i * 255) / (PIXELS / 4);
+            uint8_t brightness = (i * 255) / (TOTAL_LEDS / 4);
             if (brightness > 255)
                 brightness = 255;
             brightness = brightness * 0.6; // Reduce to 60%
@@ -1145,7 +1174,7 @@ void showSettingIndicator(SettingMode kind)
         break;
 
     case SETTING_MODE:
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
             if (i % 10 < 5)
             {
@@ -1156,9 +1185,9 @@ void showSettingIndicator(SettingMode kind)
         break;
 
     case SETTING_COLOR_SCHEME:
-        for (int i = 0; i < PIXELS; i++)
+        for (int i = 0; i < TOTAL_LEDS; i++)
         {
-            uint8_t hue = (i * 255) / PIXELS;
+            uint8_t hue = (i * 255) / TOTAL_LEDS;
             uint8_t r, g, b;
 
             if (hue < 85)

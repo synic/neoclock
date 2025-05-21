@@ -1,0 +1,45 @@
+# Arduino Library Dependencies
+Generated on Wed May 21 14:40:46 MDT 2025
+
+## Direct Includes
+#include <EEPROM.h>
+#include <FastLED.h>
+#include <RTClib.h>
+#include <Wire.h>
+
+## Library Details
+Note: This section may be incomplete if arduino-manifest can't find all libraries.
+
+usage: arduino-manifest [-h] [-d] [-r] [-v] -b fqbn [file1 file2 ... filen]
+  reads arduino surce files, usually .ino and .h files, indentify #include
+  statements and print a list of used libaries and their versions.
+  It is not recursive, the list doesn't include nested dependencies
+  It needs the arduino-cli installed and in the PATH, it parses the
+  output of the arduino-cli, so changes in arduino-cli can affect this script.
+Options
+  -b  fqbn  Fully Qualified Board Name, e.g.: arduino:avr:uno
+  -h        print this help file
+  -d        print debugging information
+  -r        print the requirements.txt file, list only user library names
+  -v        include version numbers with -r option
+Arguments
+  file1 file2 .. filen  source input files to parse, usually *.ino and
+                        eventually, *.h
+Library Name                        Version    Author                    Architecture    Type
+----------------------------------- ---------- ------------------------- --------------- -------
+EEPROM                              2.0        Arduino, Christopher Andr avr             system
+Wire                                1.0        Arduino                   avr             system
+
+## Required Libraries
+These libraries must be installed for the project to compile:
+
+### Installation
+To install the required libraries, run:
+```
+arduino-cli lib install $(cat requirements.txt)
+```
+
+### Library List
+Wire
+RTCLib
+FastLED

@@ -156,6 +156,9 @@ $(info OTA_PASS    is [${OTA_PASS}])
 $(info V           is [${V}])
 $(info VFLAG       is [${VFLAG}])
 $(info MAKE_DIR    is [${MAKE_DIR}])
+
+# Add arduino-manifest to PATH
+export PATH := $(MAKE_DIR)/tools/arduino-manifest:$(PATH)
 $(info BUILD_DIR   is [${BUILD_DIR}])
 $(info SRCINO      is [${SRCINO}])
 $(info SRC         is [${SRC}])
@@ -174,16 +177,11 @@ compile: $(ELF)
 
 $(ELF): $(SRC) $(HDRS)
 	arduino-cli compile -b $(FQBN) --build-path $(BUILD_DIR) $(VFLAG) $(CUSTOM_LIBS) $(CFLAGS)
-	@if which arduino-manifest.pl; \
+	@if [ -x "$(MAKE_DIR)/tools/generate-manifest.sh" ]; \
 	then echo "---> Generating manifest.txt"; \
-	arduino-manifest.pl -b $(FQBN) $(SRC) $(HDRS) > manifest.txt.new; \
-	if diff manifest.txt manifest.txt.new > /dev/null; \
-	then echo "---> manifest.txt is up to date (has not changed)"; \
-	rm -f manifest.txt.new; \
-	else mv -f manifest.txt.new manifest.txt; \
-	fi; \
-	else echo "---> If you want to generate manifest.txt, listing used libraries and their versions,"; \
-	echo "---> please install arduino-manifest, see https://github.com/digiampietro/arduino-manifest"; \
+	$(MAKE_DIR)/tools/generate-manifest.sh $(FQBN) $(SRC) $(HDRS); \
+	else echo "---> manifest generator script not found or not executable"; \
+	echo "---> Check that the git submodule is properly initialized with: git submodule update --init --recursive"; \
 	fi
 
 upload: compile

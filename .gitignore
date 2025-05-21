@@ -76,3 +76,6 @@ build/
 
 # TAGS
 TAGS
+
+# backup
+backup/
