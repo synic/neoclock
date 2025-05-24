@@ -1,5 +1,5 @@
 # Arduino Library Dependencies
-Generated on Wed May 21 14:40:46 MDT 2025
+Generated on Wed May 21 15:24:56 MDT 2025
 
 ## Direct Includes
 #include <EEPROM.h>
@@ -27,7 +27,6 @@ Arguments
                         eventually, *.h
 Library Name                        Version    Author                    Architecture    Type
 ----------------------------------- ---------- ------------------------- --------------- -------
-EEPROM                              2.0        Arduino, Christopher Andr avr             system
 Wire                                1.0        Arduino                   avr             system
 
 ## Required Libraries

@@ -1,2 +1,2 @@
-FQBN        ?= arduino:avr:micro
-SERIAL_DEV  ?= /dev/cu.usbmodem2101
+FQBN        ?= adafruit:avr:metro
+SERIAL_DEV  ?= /dev/cu.usbmodem210
