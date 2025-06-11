@@ -26,6 +26,7 @@
 *.sym
 
 # Ignore list for Eagle, a PCB layout tool
+*.ino.orig
 
 # Backup files
 *.s#?
@@ -77,5 +78,7 @@ build/
 # TAGS
 TAGS
 
-# backup
+# misc
 backup/
+.envrc
+.elixir-tools/

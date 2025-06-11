@@ -2,18 +2,20 @@
 // Hardware Configuration
 //----------------------------------------------------------------------------
 #define TOTAL_LEDS 60
-#define NEOPIXEL_PIN 9
+#define NEOPIXEL_PIN 11
 #define COMMON_GROUND_PIN 2
 #define HOUR_BUTTON_PIN 4
 #define MINUTE_BUTTON_PIN 3
 #define BRIGHTNESS_BUTTON_PIN 5
 #define MODE_BUTTON_PIN 6
+#define POWER_LED A3
+#define ERROR_LED A4
 
 //----------------------------------------------------------------------------
 // Clock Display Configuration
 //----------------------------------------------------------------------------
 #define CLOCK_ROTATION 0            // Number of LEDs to rotate clockface
-#define MINUTE_MARKER_BRIGHTNESS_RATIO 0.20
+#define MINUTE_MARKER_BRIGHTNESS_RATIO 0.10
 #define MINUTE_HAND_LED_COUNT 2
 #define HOUR_HAND_LED_COUNT 1
 #define SECOND_HAND_LED_COUNT 18
@@ -309,7 +311,8 @@ const ColorScheme colorSchemes[COLOR_SCHEME_COUNT] = {
         CRGB(255, 192, 203), // hour
         CRGB(255, 0, 0),     // minute
         CRGB(128, 0, 0)      // second
-    }};
+    }
+};
 
 const uint8_t brightnessLevels[] = {
     20,  // Level 0: Night mode
@@ -382,6 +385,10 @@ void resetToDefaults()
 
 void setup()
 {
+    pinMode(POWER_LED, OUTPUT);
+    digitalWrite(POWER_LED, HIGH);
+    pinMode(ERROR_LED, OUTPUT);
+
     FastLED.addLeds<WS2812B, NEOPIXEL_PIN, GRB>(strip.getLeds(), TOTAL_LEDS);
     strip.begin();
     strip.clear();
@@ -482,6 +489,7 @@ void setup()
 
     updateBrightness();
     renderClockFace();
+    digitalWrite(POWER_LED, LOW);
 }
 
 void runRTCDiagnostics()
@@ -573,7 +581,7 @@ void runRTCDiagnostics()
     }
     else
     {
-        Debug.print("Failed to communicate with DS1307, error: ");
+        Debug.print("Failed to communicate with DS3231, error: ");
         Debug.println(error);
         showDiagnosticPattern(I2C_ERROR_COLOR);
         rtcWorking = false;
@@ -618,6 +626,7 @@ void showDiagnosticPattern(CRGB color)
     static bool rtcErrorShown = false;
     uint8_t oldBrightness = strip.getBrightness();
     strip.setBrightness(DIAGNOSTIC_BRIGHTNESS);
+    digitalWrite(ERROR_LED, HIGH);
 
     Debug.print("Showing diagnostic pattern: ");
     if (color == ERROR_COLOR)
